@@ -212,6 +212,9 @@ export type Database = {
           owner_id: string
           price_cents: number
           scheduled_at: string
+          signature_path: string | null
+          signed_at: string | null
+          signed_by_name: string | null
           status: string
           team_id: string | null
           team_name: string | null
@@ -234,6 +237,9 @@ export type Database = {
           owner_id: string
           price_cents?: number
           scheduled_at: string
+          signature_path?: string | null
+          signed_at?: string | null
+          signed_by_name?: string | null
           status?: string
           team_id?: string | null
           team_name?: string | null
@@ -256,6 +262,9 @@ export type Database = {
           owner_id?: string
           price_cents?: number
           scheduled_at?: string
+          signature_path?: string | null
+          signed_at?: string | null
+          signed_by_name?: string | null
           status?: string
           team_id?: string | null
           team_name?: string | null
