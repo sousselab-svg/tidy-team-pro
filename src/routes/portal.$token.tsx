@@ -1,8 +1,8 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRef, useState } from "react";
-import { Calendar, Check, Copy, FileText, MapPin, Upload, Wallet, X } from "lucide-react";
+import { Calendar, Check, Copy, FileText, MapPin, Upload, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import {
   approveQuote,
@@ -256,8 +256,13 @@ function InvoiceCard({
   const mut = useMutation({
     mutationFn: async (file: File) => {
       if (file.size > 5 * 1024 * 1024) throw new Error("Arquivo maior que 5MB");
-      const buf = await file.arrayBuffer();
-      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const buf = new Uint8Array(await file.arrayBuffer());
+      let bin = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < buf.length; i += chunk) {
+        bin += String.fromCharCode.apply(null, Array.from(buf.subarray(i, i + chunk)));
+      }
+      const b64 = btoa(bin);
       return submit({
         data: {
           token,
@@ -359,7 +364,3 @@ function InvoiceCard({
     </li>
   );
 }
-
-// silence unused import in some builds
-void notFound;
-void X;
