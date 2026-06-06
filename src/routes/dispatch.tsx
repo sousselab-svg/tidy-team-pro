@@ -9,6 +9,8 @@ import {
   MessageCircle,
   Navigation,
   Phone,
+  ShieldAlert,
+  ShieldCheck,
   X,
 } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
@@ -16,6 +18,7 @@ import { DispatchMap } from "@/components/DispatchMap";
 import {
   dispatchTeams as initialTeams,
   TEAM_STATUS,
+  distanceM,
   type DispatchTeam,
   type TeamStatus,
 } from "@/lib/dispatch-data";
@@ -57,9 +60,18 @@ function DispatchPage() {
   }, [teams]);
 
   const checkIn = (id: string) => {
+    const team = teams.find((t) => t.id === id);
+    if (!team || team.status !== "on_way") return;
+    const fence = getGeofence(team);
+    if (!fence.ok) {
+      toast.error("Fora do geofence", {
+        description: `Equipe está a ${fence.distance} m do local (máx. ${fence.radius} m). Aproxime-se do endereço para fazer check-in.`,
+      });
+      return;
+    }
     setTeams((prev) =>
       prev.map((t) =>
-        t.id === id && t.status === "on_way"
+        t.id === id
           ? {
               ...t,
               status: "in_progress",
@@ -69,16 +81,24 @@ function DispatchPage() {
           : t,
       ),
     );
-    const team = teams.find((t) => t.id === id);
-    toast.success(`Check-in: ${team?.name ?? "equipe"}`, {
-      description: "Serviço iniciado — status atualizado para Em andamento.",
+    toast.success(`Check-in confirmado: ${team.name}`, {
+      description: `Localização validada a ${fence.distance} m do endereço.`,
     });
   };
 
   const checkOut = (id: string) => {
+    const team = teams.find((t) => t.id === id);
+    if (!team || team.status !== "in_progress") return;
+    const fence = getGeofence(team);
+    if (!fence.ok) {
+      toast.error("Fora do geofence", {
+        description: `Não é possível finalizar: equipe está a ${fence.distance} m do local (máx. ${fence.radius} m).`,
+      });
+      return;
+    }
     setTeams((prev) =>
       prev.map((t) =>
-        t.id === id && t.status === "in_progress"
+        t.id === id
           ? {
               ...t,
               status: "completed",
@@ -88,9 +108,8 @@ function DispatchPage() {
           : t,
       ),
     );
-    const team = teams.find((t) => t.id === id);
-    toast.success(`Check-out: ${team?.name ?? "equipe"}`, {
-      description: "Serviço finalizado com sucesso.",
+    toast.success(`Check-out confirmado: ${team.name}`, {
+      description: `Serviço finalizado dentro do perímetro autorizado.`,
     });
   };
 
