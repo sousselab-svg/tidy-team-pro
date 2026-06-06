@@ -252,6 +252,6 @@ export const en = {
     notFoundTitle: "Page not found",
     notFoundDesc: "The page you're looking for doesn't exist or has been moved.",
   },
-} as const;
+};
 
 export type Translations = typeof en;
