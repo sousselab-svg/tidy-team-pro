@@ -30,6 +30,8 @@ import {
 } from "@/lib/jobs.functions";
 import { listTeams } from "@/lib/teams.functions";
 import { TeamLiveMap } from "@/components/TeamLiveMap";
+import { geocodeJob } from "@/lib/geofence.functions";
+import { Radar } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -77,6 +79,7 @@ function JobDetailPage() {
   const del = useServerFn(deleteJobFn);
   const listC = useServerFn(listClients);
   const listT = useServerFn(listTeams);
+  const geocode = useServerFn(geocodeJob);
 
   const [editing, setEditing] = useState(false);
 
@@ -93,6 +96,15 @@ function JobDetailPage() {
       toast.success("Serviço atualizado");
     },
     onError: (e) => toast.error("Erro", { description: e.message }),
+  });
+
+  const geocodeMut = useMutation({
+    mutationFn: () => geocode({ data: { id: jobId } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["job", jobId] });
+      toast.success("Local geolocalizado");
+    },
+    onError: (e) => toast.error("Não foi possível geolocalizar", { description: e.message }),
   });
 
   const deleteMut = useMutation({
