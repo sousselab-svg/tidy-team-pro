@@ -11,6 +11,7 @@ import {
   type JobRow,
   type JobStatus,
 } from "@/lib/jobs.functions";
+import { listServices, type ServiceItem } from "@/lib/services.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/agenda")({
