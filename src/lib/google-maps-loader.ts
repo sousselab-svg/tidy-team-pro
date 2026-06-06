@@ -56,3 +56,11 @@ export function percentToLatLng(p: { x: number; y: number }): google.maps.LatLng
     lng: MAP_CENTER.lng + (p.x - 50) * (SPAN_DEG / 100),
   };
 }
+
+/** Inverse of `percentToLatLng`. */
+export function latLngToPercent(ll: google.maps.LatLngLiteral): { x: number; y: number } {
+  return {
+    x: 50 + ((ll.lng - MAP_CENTER.lng) * 100) / SPAN_DEG,
+    y: 50 - ((ll.lat - MAP_CENTER.lat) * 100) / SPAN_DEG,
+  };
+}
