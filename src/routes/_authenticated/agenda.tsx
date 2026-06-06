@@ -302,6 +302,34 @@ function NewJobSheet({
               </select>
             </div>
           )}
+          {services.length > 0 && (
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Do catálogo
+              </label>
+              <select
+                value=""
+                onChange={(e) => {
+                  const s = services.find((x) => x.id === e.target.value);
+                  if (!s) return;
+                  setForm({
+                    ...form,
+                    title: s.name,
+                    duration_minutes: s.default_duration_minutes,
+                    price: (s.default_price_cents / 100).toFixed(2),
+                  });
+                }}
+                className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">— escolher serviço do catálogo —</option>
+                {services.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} · {(s.default_price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Serviço</label>
             <input
