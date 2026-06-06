@@ -14,9 +14,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
+import { Route as NpsTokenRouteImport } from './routes/nps.$token'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
+import { Route as AuthenticatedNpsRouteImport } from './routes/_authenticated/nps'
 import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
 import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
@@ -50,6 +52,11 @@ const PortalTokenRoute = PortalTokenRouteImport.update({
   path: '/portal/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NpsTokenRoute = NpsTokenRouteImport.update({
+  id: '/nps/$token',
+  path: '/nps/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedServicosRoute = AuthenticatedServicosRouteImport.update({
   id: '/servicos',
   path: '/servicos',
@@ -63,6 +70,11 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
 const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
   id: '/orcamentos',
   path: '/orcamentos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNpsRoute = AuthenticatedNpsRouteImport.update({
+  id: '/nps',
+  path: '/nps',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLembretesRoute = AuthenticatedLembretesRouteImport.update({
@@ -120,9 +132,11 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
+  '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
+  '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
@@ -136,9 +150,11 @@ export interface FileRoutesByTo {
   '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
+  '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
+  '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -155,9 +171,11 @@ export interface FileRoutesById {
   '/_authenticated/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
+  '/_authenticated/nps': typeof AuthenticatedNpsRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
+  '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -175,9 +193,11 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/faturamento'
     | '/lembretes'
+    | '/nps'
     | '/orcamentos'
     | '/relatorios'
     | '/servicos'
+    | '/nps/$token'
     | '/portal/$token'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
@@ -191,9 +211,11 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/faturamento'
     | '/lembretes'
+    | '/nps'
     | '/orcamentos'
     | '/relatorios'
     | '/servicos'
+    | '/nps/$token'
     | '/portal/$token'
     | '/'
     | '/agenda/$jobId'
@@ -209,9 +231,11 @@ export interface FileRouteTypes {
     | '/_authenticated/equipe'
     | '/_authenticated/faturamento'
     | '/_authenticated/lembretes'
+    | '/_authenticated/nps'
     | '/_authenticated/orcamentos'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
+    | '/nps/$token'
     | '/portal/$token'
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
@@ -222,6 +246,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DispatchRoute: typeof DispatchRoute
+  NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
 }
 
@@ -262,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nps/$token': {
+      id: '/nps/$token'
+      path: '/nps/$token'
+      fullPath: '/nps/$token'
+      preLoaderRoute: typeof NpsTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/servicos': {
       id: '/_authenticated/servicos'
       path: '/servicos'
@@ -281,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamentos'
       fullPath: '/orcamentos'
       preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/nps': {
+      id: '/_authenticated/nps'
+      path: '/nps'
+      fullPath: '/nps'
+      preLoaderRoute: typeof AuthenticatedNpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/lembretes': {
@@ -371,6 +410,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRouteWithChildren
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
+  AuthenticatedNpsRoute: typeof AuthenticatedNpsRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
@@ -384,6 +424,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEquipeRoute: AuthenticatedEquipeRouteWithChildren,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
+  AuthenticatedNpsRoute: AuthenticatedNpsRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
@@ -397,6 +438,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DispatchRoute: DispatchRoute,
+  NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
 }
 export const routeTree = rootRouteImport
