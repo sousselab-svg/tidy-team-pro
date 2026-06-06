@@ -1,27 +1,30 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Home, Calendar, Bell, Users, FileText, Wallet, LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPendingProofsCount } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const adminNav = [
-  { to: "/", label: "Painel", Icon: Home },
-  { to: "/agenda", label: "Agenda", Icon: Calendar },
-  { to: "/lembretes", label: "Lembretes", Icon: Bell },
-  { to: "/clientes", label: "Clientes", Icon: Users },
-  { to: "/orcamentos", label: "Orçamentos", Icon: FileText },
-  { to: "/faturamento", label: "Finanças", Icon: Wallet },
+  { to: "/", labelKey: "nav.dashboard", Icon: Home },
+  { to: "/agenda", labelKey: "nav.schedule", Icon: Calendar },
+  { to: "/lembretes", labelKey: "nav.reminders", Icon: Bell },
+  { to: "/clientes", labelKey: "nav.clients", Icon: Users },
+  { to: "/orcamentos", labelKey: "nav.quotes", Icon: FileText },
+  { to: "/faturamento", labelKey: "nav.finances", Icon: Wallet },
 ] as const;
 
 const operatorNav = [
-  { to: "/agenda", label: "Agenda", Icon: Calendar },
+  { to: "/agenda", labelKey: "nav.schedule", Icon: Calendar },
 ] as const;
 
 export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { t } = useTranslation();
   const fn = useServerFn(getPendingProofsCount);
   const ctxFn = useServerFn(getMyContext);
   const { data: me } = useQuery({
@@ -45,7 +48,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
       <div className="mx-auto max-w-[480px] min-h-screen pb-24">{children}</div>
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur">
         <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-2 pt-2 pb-5">
-          {nav.map(({ to, label, Icon }) => {
+          {nav.map(({ to, labelKey, Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             const showBadge = to === "/faturamento" && proofsCount > 0;
             return (
@@ -66,7 +69,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                     )}
                   </span>
                   <span style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }}>
-                    {label}
+                    {t(labelKey)}
                   </span>
                 </Link>
               </li>
@@ -91,6 +94,7 @@ export function PageHeader({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -115,16 +119,17 @@ export function PageHeader({
         </div>
         <div className="flex items-center gap-2">
           {right}
+          <LanguageSwitcher compact />
           <Link
             to="/configuracoes"
-            aria-label="Configurações"
+            aria-label={t("common.settings")}
             className="grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
           >
             <Settings className="size-4" />
           </Link>
           <button
             onClick={signOut}
-            aria-label="Sair"
+            aria-label={t("common.signOut")}
             className="grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
           >
             <LogOut className="size-4" />
