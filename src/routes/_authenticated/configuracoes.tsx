@@ -7,15 +7,18 @@ import { Link } from "@tanstack/react-router";
 import { Users } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getSettings, saveSettings } from "@/lib/settings.functions";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
-  head: () => ({ meta: [{ title: "Configurações — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Settings — CleanOps" }] }),
   component: SettingsPage,
 });
 
 const settingsQuery = queryOptions({ queryKey: ["settings"], queryFn: () => getSettings() });
 
 function SettingsPage() {
+  const { t } = useTranslation();
   const get = useServerFn(getSettings);
   const save = useServerFn(saveSettings);
   const qc = useQueryClient();
@@ -48,14 +51,19 @@ function SettingsPage() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("Configurações salvas");
+      toast.success(t("settings.saved"));
     },
-    onError: (e) => toast.error("Erro", { description: e.message }),
+    onError: (e) => toast.error(t("common.error"), { description: e.message }),
   });
 
   return (
     <MobileShell>
-      <PageHeader eyebrow="Empresa" title="Configurações" subtitle="Dados exibidos no portal do cliente" />
+      <PageHeader eyebrow={t("settings.eyebrow")} title={t("settings.title")} subtitle={t("settings.subtitle")} />
+      <section className="px-5 pb-4">
+        <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.language")}</h2>
+        <p className="mb-3 text-xs text-muted-foreground">{t("settings.languageHint")}</p>
+        <LanguageSwitcher />
+      </section>
       <form
         className="space-y-4 px-5"
         onSubmit={(e) => {
@@ -63,15 +71,15 @@ function SettingsPage() {
           mut.mutate();
         }}
       >
-        <Field label="Nome da empresa" value={form.company_name} onChange={(v) => setForm({ ...form, company_name: v })} />
-        <Field label="Chave PIX" value={form.pix_key} onChange={(v) => setForm({ ...form, pix_key: v })} placeholder="email, CPF/CNPJ, celular ou chave aleatória" />
+        <Field label={t("settings.companyName")} value={form.company_name} onChange={(v) => setForm({ ...form, company_name: v })} />
+        <Field label={t("settings.paymentKey")} value={form.pix_key} onChange={(v) => setForm({ ...form, pix_key: v })} placeholder={t("settings.paymentKeyPlaceholder")} />
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Instruções de pagamento</label>
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.paymentInstructions")}</label>
           <textarea
             rows={4}
             value={form.pix_instructions}
             onChange={(e) => setForm({ ...form, pix_instructions: e.target.value })}
-            placeholder="Ex: Após pagar, envie comprovante pelo portal."
+            placeholder={t("settings.paymentInstructionsPlaceholder")}
             className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -80,7 +88,7 @@ function SettingsPage() {
           disabled={mut.isPending}
           className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
         >
-          {mut.isPending ? "Salvando…" : "Salvar"}
+          {mut.isPending ? t("common.saving") : t("common.save")}
         </button>
       </form>
 
@@ -94,11 +102,11 @@ function SettingsPage() {
               <Users className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-bold">Equipes e membros</p>
-              <p className="text-xs text-muted-foreground">Gerencie quem executa os serviços</p>
+              <p className="text-sm font-bold">{t("settings.teamMembers")}</p>
+              <p className="text-xs text-muted-foreground">{t("settings.teamMembersHint")}</p>
             </div>
           </div>
-          <span className="text-xs font-semibold text-primary">Abrir</span>
+          <span className="text-xs font-semibold text-primary">{t("common.open")}</span>
         </Link>
       </section>
     </MobileShell>

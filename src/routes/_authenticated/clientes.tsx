@@ -12,12 +12,14 @@ import {
   type ClientRow,
 } from "@/lib/clients.functions";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatUsPhone } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/clientes")({
   head: () => ({
     meta: [
-      { title: "Clientes — CleanOps" },
-      { name: "description", content: "CRM completo de clientes residenciais e comerciais." },
+      { title: "Clients — CleanOps" },
+      { name: "description", content: "Full CRM for residential and commercial clients." },
     ],
   }),
   component: ClientsPage,
@@ -38,6 +40,7 @@ type NewClientPayload = {
 };
 
 function ClientsPage() {
+  const { t } = useTranslation();
   const list = useServerFn(listClients);
   const create = useServerFn(createClientFn);
   const del = useServerFn(deleteClientFn);
@@ -56,9 +59,9 @@ function ClientsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["clients"] });
       setOpen(false);
-      toast.success("Cliente cadastrado");
+      toast.success(t("clients.createdToast"));
     },
-    onError: (e) => toast.error("Erro ao cadastrar", { description: e.message }),
+    onError: (e) => toast.error(t("clients.createError"), { description: e.message }),
   });
 
   const deleteMut = useMutation({
@@ -83,14 +86,14 @@ function ClientsPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="CRM"
-        title="Clientes"
-        subtitle={`${total} cadastros · ${residenciais} residenciais`}
+        eyebrow={t("clients.eyebrow")}
+        title={t("clients.title")}
+        subtitle={t("clients.subtitle", { total, residential: residenciais })}
         right={
           <button
             onClick={() => setOpen(true)}
             className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow"
-            aria-label="Novo cliente"
+            aria-label={t("clients.newClient")}
           >
             <Plus className="size-5" />
           </button>
@@ -103,16 +106,16 @@ function ClientsPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome, telefone ou endereço"
+            placeholder={t("clients.searchPlaceholder")}
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
         </label>
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {(
             [
-              { id: "all", label: "Todos" },
-              { id: "residential", label: "Residencial" },
-              { id: "commercial", label: "Comercial" },
+              { id: "all", labelKey: "clients.all" as const },
+              { id: "residential", labelKey: "clients.residential" as const },
+              { id: "commercial", labelKey: "clients.commercial" as const },
             ] as const
           ).map((tag) => (
             <button
@@ -124,7 +127,7 @@ function ClientsPage() {
                   : "bg-card text-muted-foreground ring-1 ring-border"
               }`}
             >
-              {tag.label}
+              {t(tag.labelKey)}
             </button>
           ))}
         </div>
@@ -132,13 +135,11 @@ function ClientsPage() {
 
       <section className="px-5 pt-5">
         {isLoading ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Carregando…</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("common.loading")}</p>
         ) : filtered.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-border p-8 text-center">
-            <p className="text-sm font-semibold text-foreground">Nenhum cliente ainda</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Toque em <b>+</b> para cadastrar o primeiro.
-            </p>
+            <p className="text-sm font-semibold text-foreground">{t("clients.empty")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("clients.emptyHint")}</p>
           </div>
         ) : (
           <ul className="space-y-3">
@@ -161,10 +162,11 @@ function ClientsPage() {
 }
 
 function ClientCard({ client, onDelete }: { client: ClientRow; onDelete: () => void }) {
+  const { t } = useTranslation();
   function copyPortal() {
     const url = `${window.location.origin}/portal/${client.portal_token}`;
     navigator.clipboard.writeText(url);
-    toast.success("Link do portal copiado");
+    toast.success(t("clients.portalCopied"));
   }
   return (
     <li className="rounded-2xl bg-card p-4 ring-1 ring-border">
@@ -181,7 +183,7 @@ function ClientCard({ client, onDelete }: { client: ClientRow; onDelete: () => v
           <div className="flex items-start justify-between gap-2">
             <h3 className="truncate text-base font-semibold text-foreground">{client.name}</h3>
             <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
-              {client.category === "residential" ? "Resid." : "Comerc."}
+              {client.category === "residential" ? t("clients.residentialShort") : t("clients.commercialShort")}
             </span>
           </div>
           {client.address && (
@@ -189,7 +191,7 @@ function ClientCard({ client, onDelete }: { client: ClientRow; onDelete: () => v
           )}
           {client.phone && (
             <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Phone className="size-3" /> {client.phone}
+              <Phone className="size-3" /> {formatUsPhone(client.phone)}
             </p>
           )}
         </div>
@@ -197,14 +199,14 @@ function ClientCard({ client, onDelete }: { client: ClientRow; onDelete: () => v
           <button
             onClick={copyPortal}
             className="grid size-8 place-items-center rounded-full bg-secondary text-muted-foreground"
-            aria-label="Copiar link do portal"
+            aria-label={t("clients.copyPortal")}
           >
             <Copy className="size-3.5" />
           </button>
           <button
             onClick={onDelete}
             className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Excluir"
+            aria-label={t("common.delete")}
           >
             <Trash2 className="size-3.5" />
           </button>
@@ -223,6 +225,7 @@ function NewClientSheet({
   onSubmit: (data: NewClientPayload) => void;
   busy: boolean;
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -236,8 +239,8 @@ function NewClientSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur">
       <div className="w-full max-w-[480px] rounded-t-3xl bg-card p-5 pb-10 ring-1 ring-border">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Novo cliente</h2>
-          <button onClick={onClose} aria-label="Fechar" className="grid size-8 place-items-center rounded-full bg-secondary">
+          <h2 className="text-lg font-bold">{t("clients.sheetTitle")}</h2>
+          <button onClick={onClose} aria-label={t("common.close")} className="grid size-8 place-items-center rounded-full bg-secondary">
             <X className="size-4" />
           </button>
         </div>
@@ -255,14 +258,14 @@ function NewClientSheet({
           }}
           className="mt-4 space-y-3"
         >
-          <Field label="Nome" required value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
+          <Field label={t("clients.name")} required value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
           <div className="grid grid-cols-2 gap-2">
-            <Field label="Telefone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
-            <Field label="E-mail" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+            <Field label={t("clients.phone")} value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+            <Field label={t("clients.email")} type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
           </div>
-          <Field label="Endereço" value={form.address} onChange={(v) => setForm({ ...form, address: v })} />
+          <Field label={t("clients.address")} value={form.address} onChange={(v) => setForm({ ...form, address: v })} />
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Categoria</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("clients.category")}</label>
             <div className="mt-1 grid grid-cols-2 gap-2">
               {(["residential", "commercial"] as const).map((cat) => (
                 <button
@@ -275,7 +278,7 @@ function NewClientSheet({
                       : "bg-secondary text-muted-foreground"
                   }`}
                 >
-                  {cat === "residential" ? "Residencial" : "Comercial"}
+                  {cat === "residential" ? t("clients.residential") : t("clients.commercial")}
                 </button>
               ))}
             </div>
@@ -285,7 +288,7 @@ function NewClientSheet({
             disabled={busy || !form.name.trim()}
             className="mt-2 w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
-            {busy ? "Salvando…" : "Salvar cliente"}
+            {busy ? t("common.saving") : t("clients.saveClient")}
           </button>
         </form>
       </div>
