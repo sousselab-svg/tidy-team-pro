@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Radio, Users, FileText, Wallet, LogOut } from "lucide-react";
+import { Home, Calendar, Radio, Users, FileText, Wallet, LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -82,6 +82,13 @@ export function PageHeader({
         </div>
         <div className="flex items-center gap-2">
           {right}
+          <Link
+            to="/configuracoes"
+            aria-label="Configurações"
+            className="grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
+          >
+            <Settings className="size-4" />
+          </Link>
           <button
             onClick={signOut}
             aria-label="Sair"
