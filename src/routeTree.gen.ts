@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
+import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
@@ -48,6 +49,11 @@ const PortalTokenRoute = PortalTokenRouteImport.update({
   id: '/portal/$token',
   path: '/portal/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedServicosRoute = AuthenticatedServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   id: '/relatorios',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/lembretes': typeof AuthenticatedLembretesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/servicos': typeof AuthenticatedServicosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/lembretes': typeof AuthenticatedLembretesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/servicos': typeof AuthenticatedServicosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
+  '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/orcamentos'
     | '/relatorios'
+    | '/servicos'
     | '/portal/$token'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/orcamentos'
     | '/relatorios'
+    | '/servicos'
     | '/portal/$token'
     | '/'
     | '/agenda/$jobId'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/lembretes'
     | '/_authenticated/orcamentos'
     | '/_authenticated/relatorios'
+    | '/_authenticated/servicos'
     | '/portal/$token'
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/$token'
       preLoaderRoute: typeof PortalTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/servicos': {
+      id: '/_authenticated/servicos'
+      path: '/servicos'
+      fullPath: '/servicos'
+      preLoaderRoute: typeof AuthenticatedServicosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/relatorios': {
       id: '/_authenticated/relatorios'
@@ -354,6 +373,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
+  AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -366,6 +386,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
+  AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
