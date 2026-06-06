@@ -8,6 +8,7 @@ export type TeamMember = {
   name: string;
   phone: string | null;
   role: string | null;
+  user_id: string | null;
 };
 
 export type TeamRow = {
@@ -34,7 +35,7 @@ export const listTeams = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<TeamRow[]> => {
     const { data, error } = await context.supabase
       .from("teams")
-      .select("id, name, color, members:team_members(id, team_id, name, phone, role)")
+      .select("id, name, color, members:team_members(id, team_id, name, phone, role, user_id)")
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as unknown as TeamRow[];
