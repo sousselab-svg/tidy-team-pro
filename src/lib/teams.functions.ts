@@ -100,3 +100,17 @@ export const removeTeamMember = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const moveTeamMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ id: z.string().uuid(), team_id: z.string().uuid() }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("team_members")
+      .update({ team_id: data.team_id })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
