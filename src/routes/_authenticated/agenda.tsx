@@ -54,6 +54,11 @@ function AgendaPage() {
 
   const jobsQ = useQuery({ queryKey: ["jobs"], queryFn: () => list() });
   const clientsQ = useQuery({ queryKey: ["clients"], queryFn: () => listC() });
+  const listS = useServerFn(listServices);
+  const servicesQ = useQuery({
+    queryKey: ["services", "active"],
+    queryFn: () => listS({ data: { onlyActive: true } }),
+  });
 
   const dayJobs = useMemo(() => {
     const start = new Date(day);
@@ -149,6 +154,7 @@ function AgendaPage() {
       {open && (
         <NewJobSheet
           clients={clientsQ.data ?? []}
+          services={servicesQ.data ?? []}
           defaultDay={day}
           onClose={() => setOpen(false)}
           onSubmit={(payload) => createMut.mutate(payload)}
