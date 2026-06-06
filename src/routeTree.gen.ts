@@ -31,6 +31,7 @@ import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authenticated/equipe.rastrear'
 import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
+import { Route as ApiPublicHooksGrowthCronRouteImport } from './routes/api/public/hooks/growth-cron'
 
 const DispatchRoute = DispatchRouteImport.update({
   id: '/dispatch',
@@ -146,6 +147,12 @@ const AuthenticatedAgendaJobIdRoute =
     path: '/$jobId',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const ApiPublicHooksGrowthCronRoute =
+  ApiPublicHooksGrowthCronRouteImport.update({
+    id: '/api/public/hooks/growth-cron',
+    path: '/api/public/hooks/growth-cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -217,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/_authenticated/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/portal/$token'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
+    | '/api/public/hooks/growth-cron'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
+    | '/api/public/hooks/growth-cron'
   id:
     | '__root__'
     | '/_authenticated'
@@ -289,6 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
     | '/_authenticated/equipe/rastrear'
+    | '/api/public/hooks/growth-cron'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -297,6 +310,7 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
+  ApiPublicHooksGrowthCronRoute: typeof ApiPublicHooksGrowthCronRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -455,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaJobIdRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/api/public/hooks/growth-cron': {
+      id: '/api/public/hooks/growth-cron'
+      path: '/api/public/hooks/growth-cron'
+      fullPath: '/api/public/hooks/growth-cron'
+      preLoaderRoute: typeof ApiPublicHooksGrowthCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -525,6 +546,7 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
+  ApiPublicHooksGrowthCronRoute: ApiPublicHooksGrowthCronRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
