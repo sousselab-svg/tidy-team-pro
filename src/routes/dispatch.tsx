@@ -1,9 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Battery, Gauge, MapPin, MessageCircle, Navigation, Phone, X } from "lucide-react";
+import {
+  Battery,
+  CheckCircle2,
+  Gauge,
+  LogIn,
+  MapPin,
+  MessageCircle,
+  Navigation,
+  Phone,
+  X,
+} from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { DispatchMap } from "@/components/DispatchMap";
-import { dispatchTeams, TEAM_STATUS, type TeamStatus } from "@/lib/dispatch-data";
+import {
+  dispatchTeams as initialTeams,
+  TEAM_STATUS,
+  type DispatchTeam,
+  type TeamStatus,
+} from "@/lib/dispatch-data";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dispatch")({
   head: () => ({
@@ -24,27 +40,66 @@ const FILTERS: { id: TeamStatus | "all"; label: string }[] = [
 ];
 
 function DispatchPage() {
+  const [teams, setTeams] = useState<DispatchTeam[]>(initialTeams);
   const [filter, setFilter] = useState<TeamStatus | "all">("all");
-  const [selectedId, setSelectedId] = useState<string | undefined>(dispatchTeams[1]?.id);
+  const [selectedId, setSelectedId] = useState<string | undefined>(initialTeams[1]?.id);
 
   const visibleTeams = useMemo(
-    () => (filter === "all" ? dispatchTeams : dispatchTeams.filter((t) => t.status === filter)),
-    [filter],
+    () => (filter === "all" ? teams : teams.filter((t) => t.status === filter)),
+    [filter, teams],
   );
-  const selected = dispatchTeams.find((t) => t.id === selectedId);
+  const selected = teams.find((t) => t.id === selectedId);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { on_way: 0, in_progress: 0, completed: 0, idle: 0 };
-    for (const t of dispatchTeams) c[t.status] = (c[t.status] ?? 0) + 1;
+    for (const t of teams) c[t.status] = (c[t.status] ?? 0) + 1;
     return c;
-  }, []);
+  }, [teams]);
+
+  const checkIn = (id: string) => {
+    setTeams((prev) =>
+      prev.map((t) =>
+        t.id === id && t.status === "on_way"
+          ? {
+              ...t,
+              status: "in_progress",
+              speedKmh: 0,
+              job: t.job ? { ...t.job, etaMin: undefined, progress: 5 } : t.job,
+            }
+          : t,
+      ),
+    );
+    const team = teams.find((t) => t.id === id);
+    toast.success(`Check-in: ${team?.name ?? "equipe"}`, {
+      description: "Serviço iniciado — status atualizado para Em andamento.",
+    });
+  };
+
+  const checkOut = (id: string) => {
+    setTeams((prev) =>
+      prev.map((t) =>
+        t.id === id && t.status === "in_progress"
+          ? {
+              ...t,
+              status: "completed",
+              speedKmh: 0,
+              job: t.job ? { ...t.job, progress: 100 } : t.job,
+            }
+          : t,
+      ),
+    );
+    const team = teams.find((t) => t.id === id);
+    toast.success(`Check-out: ${team?.name ?? "equipe"}`, {
+      description: "Serviço finalizado com sucesso.",
+    });
+  };
 
   return (
     <MobileShell>
       <PageHeader
         eyebrow="Dispatch"
         title="Equipes em campo"
-        subtitle={`${dispatchTeams.length} equipes · rastreamento ao vivo`}
+        subtitle={`${teams.length} equipes · rastreamento ao vivo`}
       />
 
       <section className="px-5">
@@ -77,7 +132,7 @@ function DispatchPage() {
       </section>
 
       <section className="px-5 pt-5">
-        <DispatchMap teams={dispatchTeams} selectedId={selectedId} onSelect={setSelectedId} />
+        <DispatchMap teams={teams} selectedId={selectedId} onSelect={setSelectedId} />
       </section>
 
       <section className="px-5 pt-5">
@@ -189,6 +244,34 @@ function DispatchPage() {
                       <Battery className="size-3" /> {team.batteryPct}%
                     </span>
                   </div>
+
+                  {(team.status === "on_way" || team.status === "in_progress") && (
+                    <div className="mt-3 border-t border-border pt-3">
+                      {team.status === "on_way" ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            checkIn(team.id);
+                          }}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                        >
+                          <LogIn className="size-3.5" /> Fazer check-in
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            checkOut(team.id);
+                          }}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-bold text-background"
+                        >
+                          <CheckCircle2 className="size-3.5" /> Fazer check-out
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </button>
               </li>
             );
@@ -218,9 +301,25 @@ function DispatchPage() {
               </button>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <button className="flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground">
-                <Navigation className="size-3.5" /> Rota
-              </button>
+              {selected.status === "on_way" ? (
+                <button
+                  onClick={() => checkIn(selected.id)}
+                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                >
+                  <LogIn className="size-3.5" /> Check-in
+                </button>
+              ) : selected.status === "in_progress" ? (
+                <button
+                  onClick={() => checkOut(selected.id)}
+                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                >
+                  <CheckCircle2 className="size-3.5" /> Check-out
+                </button>
+              ) : (
+                <button className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-white/10 py-2 text-xs font-bold">
+                  <Navigation className="size-3.5" /> Rota
+                </button>
+              )}
               <button className="flex items-center justify-center gap-1 rounded-xl bg-white/10 py-2 text-xs font-bold">
                 <Phone className="size-3.5" /> Ligar
               </button>
