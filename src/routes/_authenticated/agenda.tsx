@@ -7,7 +7,6 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listClients, type ClientRow } from "@/lib/clients.functions";
 import {
   createJob as createJobFn,
-  deleteJob as deleteJobFn,
   listJobs,
   type JobRow,
   type JobStatus,
@@ -43,7 +42,6 @@ function brl(cents: number) {
 function AgendaPage() {
   const list = useServerFn(listJobs);
   const create = useServerFn(createJobFn);
-  const del = useServerFn(deleteJobFn);
   const listC = useServerFn(listClients);
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -74,11 +72,6 @@ function AgendaPage() {
       toast.success("Serviço agendado");
     },
     onError: (e) => toast.error("Erro", { description: e.message }),
-  });
-
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["jobs"] }),
   });
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
