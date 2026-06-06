@@ -10,6 +10,7 @@ import {
   createTeam,
   deleteTeam,
   listTeams,
+  moveTeamMember,
   removeTeamMember,
   type TeamRow,
 } from "@/lib/teams.functions";
@@ -239,9 +240,11 @@ function TeamsTab({ isAdmin }: { isAdmin: boolean }) {
   const del = useServerFn(deleteTeam);
   const addMem = useServerFn(addTeamMember);
   const rmMem = useServerFn(removeTeamMember);
+  const moveMem = useServerFn(moveTeamMember);
   const qc = useQueryClient();
   const [newTeam, setNewTeam] = useState("");
   const [openMemberFor, setOpenMemberFor] = useState<TeamRow | null>(null);
+  const [moveFor, setMoveFor] = useState<{ id: string; name: string; team_id: string } | null>(null);
 
   const { data: teams = [] } = useQuery({ ...teamsQuery, queryFn: () => list() });
 
@@ -275,6 +278,16 @@ function TeamsTab({ isAdmin }: { isAdmin: boolean }) {
   const rmMut = useMutation({
     mutationFn: (id: string) => rmMem({ data: { id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
+  });
+
+  const moveMut = useMutation({
+    mutationFn: (input: { id: string; team_id: string }) => moveMem({ data: input }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teams"] });
+      setMoveFor(null);
+      toast.success("Membro movido");
+    },
+    onError: (e: Error) => toast.error("Erro", { description: e.message }),
   });
 
   return (
@@ -344,23 +357,37 @@ function TeamsTab({ isAdmin }: { isAdmin: boolean }) {
                     {t.members.map((m) => (
                       <li key={m.id} className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{m.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-medium">{m.name}</p>
+                            <StatusBadge active={!!m.user_id} />
+                          </div>
                           <p className="truncate text-[11px] text-muted-foreground">
                             {[m.role, m.phone].filter(Boolean).join(" · ") || "—"}
                           </p>
-                          {m.user_id && (
-                            <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--success)]">
-                              <KeyRound className="size-3" /> Operador vinculado
-                            </p>
-                          )}
                         </div>
-                        <button
-                          onClick={() => rmMut.mutate(m.id)}
-                          className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          aria-label="Remover membro"
-                        >
-                          <X className="size-3.5" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          {isAdmin && teams.length > 1 && (
+                            <button
+                              onClick={() =>
+                                setMoveFor({ id: m.id, name: m.name, team_id: t.id })
+                              }
+                              className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                              aria-label="Mover de equipe"
+                              title="Mover para outra equipe"
+                            >
+                              <Link2 className="size-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (confirm(`Remover ${m.name} da equipe?`)) rmMut.mutate(m.id);
+                            }}
+                            className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                            aria-label="Remover membro"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -379,7 +406,85 @@ function TeamsTab({ isAdmin }: { isAdmin: boolean }) {
           onSubmit={(p) => addMut.mutate(p)}
         />
       )}
+
+      {moveFor && (
+        <MoveMemberSheet
+          memberName={moveFor.name}
+          currentTeamId={moveFor.team_id}
+          teams={teams}
+          busy={moveMut.isPending}
+          onClose={() => setMoveFor(null)}
+          onSubmit={(team_id) => moveMut.mutate({ id: moveFor.id, team_id })}
+        />
+      )}
     </>
+  );
+}
+
+function StatusBadge({ active }: { active: boolean }) {
+  if (active) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--success)]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[color:var(--success)]">
+        <KeyRound className="size-2.5" /> Ativo
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+      Pendente
+    </span>
+  );
+}
+
+function MoveMemberSheet({
+  memberName,
+  currentTeamId,
+  teams,
+  busy,
+  onClose,
+  onSubmit,
+}: {
+  memberName: string;
+  currentTeamId: string;
+  teams: TeamRow[];
+  busy: boolean;
+  onClose: () => void;
+  onSubmit: (team_id: string) => void;
+}) {
+  const others = teams.filter((t) => t.id !== currentTeamId);
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur">
+      <div className="w-full max-w-[480px] rounded-t-3xl bg-card p-5 pb-10 ring-1 ring-border">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">Mover · {memberName}</h2>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-full bg-secondary">
+            <X className="size-4" />
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">Escolha a nova equipe:</p>
+        <ul className="mt-3 space-y-2">
+          {others.map((t) => (
+            <li key={t.id}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => onSubmit(t.id)}
+                className="flex w-full items-center gap-2 rounded-xl bg-secondary px-3 py-3 text-left text-sm font-semibold hover:bg-secondary/80 disabled:opacity-50"
+              >
+                <span
+                  className="size-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: t.color ?? "var(--muted-foreground)" }}
+                />
+                {t.name}
+                <span className="ml-auto text-[11px] text-muted-foreground">
+                  {t.members.length} membros
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
