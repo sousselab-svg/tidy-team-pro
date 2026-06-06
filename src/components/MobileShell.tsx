@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Radio, FileText, Wallet } from "lucide-react";
+import { Home, Calendar, Radio, Users, FileText, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 
 const nav = [
   { to: "/", label: "Painel", Icon: Home },
   { to: "/agenda", label: "Agenda", Icon: Calendar },
   { to: "/dispatch", label: "Dispatch", Icon: Radio },
+  { to: "/clientes", label: "Clientes", Icon: Users },
   { to: "/orcamentos", label: "Orçamentos", Icon: FileText },
   { to: "/faturamento", label: "Finanças", Icon: Wallet },
 ] as const;
@@ -16,14 +17,14 @@ export function MobileShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[480px] min-h-screen pb-24">{children}</div>
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur">
-        <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-3 pt-2 pb-5">
+        <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-2 pt-2 pb-5">
           {nav.map(({ to, label, Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             return (
               <li key={to} className="flex-1">
                 <Link
                   to={to}
-                  className="flex flex-col items-center gap-1 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                  className="flex flex-col items-center gap-0.5 py-1 text-[9px] font-semibold uppercase tracking-tight"
                 >
                   <Icon
                     className="size-5"
