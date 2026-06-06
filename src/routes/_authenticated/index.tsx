@@ -242,6 +242,12 @@ function Dashboard() {
             </span>
             <p className="text-[11px] font-bold leading-tight">Win-back</p>
           </Link>
+          <Link to="/operacao" className="flex flex-col items-start gap-2 rounded-2xl bg-card p-3 ring-1 ring-border">
+            <span className="grid size-9 place-items-center rounded-full bg-[color:var(--success)]/15 text-[color:var(--success)]">
+              <RouteIcon className="size-4" />
+            </span>
+            <p className="text-[11px] font-bold leading-tight">Route opt.</p>
+          </Link>
         </div>
       </section>
 
