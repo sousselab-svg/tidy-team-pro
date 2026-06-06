@@ -17,6 +17,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
+import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
 
 const OrcamentosRoute = OrcamentosRouteImport.update({
   id: '/orcamentos',
@@ -57,6 +58,12 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAgendaJobIdRoute =
+  AuthenticatedAgendaJobIdRouteImport.update({
+    id: '/$jobId',
+    path: '/$jobId',
+    getParentRoute: () => AuthenticatedAgendaRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -64,8 +71,9 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/faturamento': typeof FaturamentoRoute
   '/orcamentos': typeof OrcamentosRoute
-  '/agenda': typeof AuthenticatedAgendaRoute
+  '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
+  '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -73,8 +81,9 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/faturamento': typeof FaturamentoRoute
   '/orcamentos': typeof OrcamentosRoute
-  '/agenda': typeof AuthenticatedAgendaRoute
+  '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
+  '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -84,8 +93,9 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/faturamento': typeof FaturamentoRoute
   '/orcamentos': typeof OrcamentosRoute
-  '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
+  '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
+  '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/agenda'
     | '/clientes'
+    | '/agenda/$jobId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/agenda'
     | '/clientes'
+    | '/agenda/$jobId'
   id:
     | '__root__'
     | '/'
@@ -116,6 +128,7 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/_authenticated/agenda'
     | '/_authenticated/clientes'
+    | '/_authenticated/agenda/$jobId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -185,16 +198,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agenda/$jobId': {
+      id: '/_authenticated/agenda/$jobId'
+      path: '/$jobId'
+      fullPath: '/agenda/$jobId'
+      preLoaderRoute: typeof AuthenticatedAgendaJobIdRouteImport
+      parentRoute: typeof AuthenticatedAgendaRoute
+    }
   }
 }
 
+interface AuthenticatedAgendaRouteChildren {
+  AuthenticatedAgendaJobIdRoute: typeof AuthenticatedAgendaJobIdRoute
+}
+
+const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
+  AuthenticatedAgendaJobIdRoute: AuthenticatedAgendaJobIdRoute,
+}
+
+const AuthenticatedAgendaRouteWithChildren =
+  AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
+  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
+  AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
 }
 

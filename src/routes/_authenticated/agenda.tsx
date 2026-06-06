@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -7,7 +7,6 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listClients, type ClientRow } from "@/lib/clients.functions";
 import {
   createJob as createJobFn,
-  deleteJob as deleteJobFn,
   listJobs,
   type JobRow,
   type JobStatus,
@@ -43,7 +42,6 @@ function brl(cents: number) {
 function AgendaPage() {
   const list = useServerFn(listJobs);
   const create = useServerFn(createJobFn);
-  const del = useServerFn(deleteJobFn);
   const listC = useServerFn(listClients);
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -74,11 +72,6 @@ function AgendaPage() {
       toast.success("Serviço agendado");
     },
     onError: (e) => toast.error("Erro", { description: e.message }),
-  });
-
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => del({ data: { id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["jobs"] }),
   });
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -146,7 +139,7 @@ function AgendaPage() {
         ) : (
           <ol className="relative space-y-4 border-l-2 border-border pl-5">
             {dayJobs.map((job) => (
-              <JobItem key={job.id} job={job} onDelete={() => deleteMut.mutate(job.id)} />
+              <JobItem key={job.id} job={job} />
             ))}
           </ol>
         )}
@@ -165,7 +158,7 @@ function AgendaPage() {
   );
 }
 
-function JobItem({ job, onDelete }: { job: JobRow; onDelete: () => void }) {
+function JobItem({ job }: { job: JobRow }) {
   const meta = STATUS_META[job.status];
   const time = new Date(job.scheduled_at).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
@@ -177,7 +170,11 @@ function JobItem({ job, onDelete }: { job: JobRow; onDelete: () => void }) {
         className="absolute -left-[27px] top-3 grid size-4 place-items-center rounded-full ring-4 ring-background"
         style={{ backgroundColor: meta.color }}
       />
-      <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
+      <Link
+        to="/agenda/$jobId"
+        params={{ jobId: job.id }}
+        className="block rounded-2xl bg-card p-4 ring-1 ring-border transition active:scale-[.99]"
+      >
         <div className="flex items-baseline justify-between">
           <span className="font-mono text-sm font-bold text-foreground">{time}</span>
           <span
@@ -201,14 +198,8 @@ function JobItem({ job, onDelete }: { job: JobRow; onDelete: () => void }) {
             </span>
           )}
           <span className="ml-auto font-semibold text-foreground">{brl(job.price_cents)}</span>
-          <button
-            onClick={onDelete}
-            className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase text-destructive hover:bg-destructive/10"
-          >
-            Excluir
-          </button>
         </div>
-      </div>
+      </Link>
     </li>
   );
 }

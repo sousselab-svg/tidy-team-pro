@@ -36,6 +36,23 @@ const JobInput = z.object({
   notes: z.string().max(2000).nullable().optional(),
 });
 
+const JobUpdateInput = z.object({
+  id: z.string().uuid(),
+  patch: z.object({
+    client_id: z.string().uuid().nullable().optional(),
+    title: z.string().min(1).max(200).optional(),
+    address: z.string().max(500).nullable().optional(),
+    scheduled_at: z.string().datetime().optional(),
+    duration_minutes: z.number().int().min(15).max(8 * 60).optional(),
+    price_cents: z.number().int().min(0).optional(),
+    team_name: z.string().max(100).nullable().optional(),
+    notes: z.string().max(2000).nullable().optional(),
+    status: z
+      .enum(["scheduled", "on_way", "in_progress", "completed", "cancelled"])
+      .optional(),
+  }),
+});
+
 export const listJobs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<JobRow[]> => {
@@ -45,6 +62,33 @@ export const listJobs = createServerFn({ method: "GET" })
       .order("scheduled_at", { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as JobRow[];
+  });
+
+export const getJob = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }): Promise<JobRow | null> => {
+    const { data: row, error } = await context.supabase
+      .from("jobs")
+      .select("*, client:clients(name)")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return (row as JobRow | null) ?? null;
+  });
+
+export const updateJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => JobUpdateInput.parse(raw))
+  .handler(async ({ context, data }): Promise<JobRow> => {
+    const { data: row, error } = await context.supabase
+      .from("jobs")
+      .update(data.patch)
+      .eq("id", data.id)
+      .select("*, client:clients(name)")
+      .single();
+    if (error) throw new Error(error.message);
+    return row as JobRow;
   });
 
 export const createJob = createServerFn({ method: "POST" })
