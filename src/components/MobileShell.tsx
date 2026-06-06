@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Bell, Users, FileText, Wallet, LogOut, Settings } from "lucide-react";
+import { Home, Calendar, Users, FileText, Wallet, LogOut, Settings, UsersRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +12,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 const adminNav = [
   { to: "/", labelKey: "nav.dashboard", Icon: Home },
   { to: "/agenda", labelKey: "nav.schedule", Icon: Calendar },
-  { to: "/lembretes", labelKey: "nav.reminders", Icon: Bell },
+  { to: "/equipe", labelKey: "nav.team", Icon: UsersRound },
   { to: "/clientes", labelKey: "nav.clients", Icon: Users },
   { to: "/orcamentos", labelKey: "nav.quotes", Icon: FileText },
   { to: "/faturamento", labelKey: "nav.finances", Icon: Wallet },
