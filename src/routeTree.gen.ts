@@ -16,6 +16,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
+import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
@@ -56,6 +57,11 @@ const AuthenticatedFaturamentoRoute =
     path: '/faturamento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/clientes'
     | '/configuracoes'
+    | '/equipe'
     | '/faturamento'
     | '/orcamentos'
     | '/portal/$token'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/clientes'
     | '/configuracoes'
+    | '/equipe'
     | '/faturamento'
     | '/orcamentos'
     | '/portal/$token'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda'
     | '/_authenticated/clientes'
     | '/_authenticated/configuracoes'
+    | '/_authenticated/equipe'
     | '/_authenticated/faturamento'
     | '/_authenticated/orcamentos'
     | '/portal/$token'
@@ -215,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFaturamentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/equipe': {
+      id: '/_authenticated/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof AuthenticatedEquipeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/configuracoes': {
       id: '/_authenticated/configuracoes'
       path: '/configuracoes'
@@ -261,6 +280,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -270,6 +290,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -287,3 +308,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
