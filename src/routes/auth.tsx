@@ -131,6 +131,16 @@ function AuthPage() {
           >
             {busy ? t("common.wait") : mode === "signin" ? t("auth.signIn") : t("auth.signUp")}
           </button>
+          {mode === "signin" && (
+            <div className="text-right">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
+          )}
         </form>
 
         <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-wider text-muted-foreground">
