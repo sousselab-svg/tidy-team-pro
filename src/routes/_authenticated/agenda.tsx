@@ -224,12 +224,14 @@ type CreateJobPayload = {
 
 function NewJobSheet({
   clients,
+  services,
   defaultDay,
   onClose,
   onSubmit,
   busy,
 }: {
   clients: ClientRow[];
+  services: ServiceItem[];
   defaultDay: Date;
   onClose: () => void;
   onSubmit: (data: CreateJobPayload) => void;
