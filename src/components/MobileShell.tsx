@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Radio, Users, FileText, Wallet, LogOut, Settings } from "lucide-react";
+import { Home, Calendar, Bell, Users, FileText, Wallet, LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import { getPendingProofsCount } from "@/lib/dashboard.functions";
 const nav = [
   { to: "/", label: "Painel", Icon: Home },
   { to: "/agenda", label: "Agenda", Icon: Calendar },
-  { to: "/dispatch", label: "Dispatch", Icon: Radio },
+  { to: "/lembretes", label: "Lembretes", Icon: Bell },
   { to: "/clientes", label: "Clientes", Icon: Users },
   { to: "/orcamentos", label: "Orçamentos", Icon: FileText },
   { to: "/faturamento", label: "Finanças", Icon: Wallet },

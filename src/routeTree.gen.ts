@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
+import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
 import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
@@ -50,6 +51,11 @@ const PortalTokenRoute = PortalTokenRouteImport.update({
 const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
   id: '/orcamentos',
   path: '/orcamentos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLembretesRoute = AuthenticatedLembretesRouteImport.update({
+  id: '/lembretes',
+  path: '/lembretes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFaturamentoRoute =
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
+  '/lembretes': typeof AuthenticatedLembretesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
+  '/lembretes': typeof AuthenticatedLembretesRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/': typeof AuthenticatedIndexRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
+  '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/equipe'
     | '/faturamento'
+    | '/lembretes'
     | '/orcamentos'
     | '/portal/$token'
     | '/agenda/$jobId'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/equipe'
     | '/faturamento'
+    | '/lembretes'
     | '/orcamentos'
     | '/portal/$token'
     | '/'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes'
     | '/_authenticated/equipe'
     | '/_authenticated/faturamento'
+    | '/_authenticated/lembretes'
     | '/_authenticated/orcamentos'
     | '/portal/$token'
     | '/_authenticated/'
@@ -231,6 +243,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamentos'
       fullPath: '/orcamentos'
       preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lembretes': {
+      id: '/_authenticated/lembretes'
+      path: '/lembretes'
+      fullPath: '/lembretes'
+      preLoaderRoute: typeof AuthenticatedLembretesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/faturamento': {
@@ -313,6 +332,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRouteWithChildren
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
+  AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -323,6 +343,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRouteWithChildren,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
+  AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }

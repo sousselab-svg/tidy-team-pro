@@ -43,9 +43,9 @@ function Dashboard() {
         subtitle="Resumo da operação"
         right={
           <Link
-            to="/faturamento"
+            to="/lembretes"
             className="relative grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
-            aria-label="Comprovantes pendentes"
+            aria-label="Lembretes"
           >
             <Bell className="size-5" />
             {(data?.pendingProofsCount ?? 0) > 0 && (
