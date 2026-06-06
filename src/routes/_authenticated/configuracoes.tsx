@@ -3,6 +3,8 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
+import { Users } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getSettings, saveSettings } from "@/lib/settings.functions";
 
@@ -81,6 +83,24 @@ function SettingsPage() {
           {mut.isPending ? "Salvando…" : "Salvar"}
         </button>
       </form>
+
+      <section className="px-5 pt-6">
+        <Link
+          to="/equipe"
+          className="flex items-center justify-between rounded-2xl bg-card p-4 ring-1 ring-border"
+        >
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-full bg-secondary text-foreground">
+              <Users className="size-4" />
+            </span>
+            <div>
+              <p className="text-sm font-bold">Equipes e membros</p>
+              <p className="text-xs text-muted-foreground">Gerencie quem executa os serviços</p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold text-primary">Abrir</span>
+        </Link>
+      </section>
     </MobileShell>
   );
 }
