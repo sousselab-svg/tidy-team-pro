@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -140,7 +142,7 @@ function BillingPage() {
                       <h3 className="truncate text-base font-semibold">{inv.title}</h3>
                       {inv.due_date && (
                         <p className="text-[11px] text-muted-foreground">
-                          Vence {new Date(inv.due_date).toLocaleDateString("pt-BR")}
+                          Vence {formatDate(inv.due_date)}
                         </p>
                       )}
                     </div>

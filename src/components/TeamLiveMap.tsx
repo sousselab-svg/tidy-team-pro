@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from "@/lib/format";
 /// <reference types="google.maps" />
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ function relativeTime(iso: string): string {
   if (diff < 60) return `há ${diff}s`;
   if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
   if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`;
-  return new Date(iso).toLocaleString("pt-BR");
+  return formatDateTime(iso);
 }
 
 /**

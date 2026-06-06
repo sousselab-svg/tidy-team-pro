@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -87,7 +89,7 @@ function PortalPage() {
             {upcomingJobs.map((j) => (
               <li key={j.id} className="rounded-2xl bg-card p-4 ring-1 ring-border">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-                  {new Date(j.scheduled_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  {formatDateTime(j.scheduled_at)}
                 </p>
                 <h3 className="mt-1 text-base font-semibold">{j.title}</h3>
                 {j.address && (
@@ -289,7 +291,7 @@ function InvoiceCard({
         <div className="min-w-0">
           <h3 className="truncate text-base font-semibold">{invoice.title}</h3>
           {invoice.due_date && (
-            <p className="text-[11px] text-muted-foreground">Vence {new Date(invoice.due_date).toLocaleDateString("pt-BR")}</p>
+            <p className="text-[11px] text-muted-foreground">Vence {formatDate(invoice.due_date)}</p>
           )}
         </div>
         <p className="shrink-0 text-lg font-bold">{brl(invoice.amount_cents)}</p>
@@ -297,7 +299,7 @@ function InvoiceCard({
 
       {isPaid ? (
         <p className="mt-3 rounded-xl bg-[color:var(--success)]/10 px-3 py-2 text-xs font-semibold text-[color:var(--success)]">
-          ✓ Pago em {invoice.confirmed_at ? new Date(invoice.confirmed_at).toLocaleDateString("pt-BR") : ""}
+          ✓ Pago em {invoice.confirmed_at ? formatDate(invoice.confirmed_at) : ""}
         </p>
       ) : waitingConfirm ? (
         <p className="mt-3 rounded-xl bg-[color:var(--warning)]/10 px-3 py-2 text-xs font-semibold text-[color:var(--warning)]">

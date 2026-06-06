@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -121,8 +123,8 @@ function NpsRow({ row }: { row: NpsSurveyWithJob }) {
       <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
         <span>
           {submitted
-            ? `Respondido em ${new Date(row.submitted_at!).toLocaleDateString("pt-BR")}`
-            : `Enviado em ${new Date(row.sent_at ?? row.created_at).toLocaleDateString("pt-BR")}`}
+            ? `Respondido em ${formatDate(row.submitted_at!)}`
+            : `Enviado em ${formatDate(row.sent_at ?? row.created_at)}`}
         </span>
         {!submitted && (
           <button
