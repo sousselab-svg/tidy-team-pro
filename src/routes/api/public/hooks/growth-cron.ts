@@ -111,7 +111,21 @@ export const Route = createFileRoute("/api/public/hooks/growth-cron")({
         }
 
         return new Response(
-          JSON.stringify({ ok: true, jobsCreated, couponsCreated }),
+          await (async () => {
+            const { enqueueUpcomingReminders, processPendingSms } = await import(
+              "@/lib/sms.server"
+            );
+            const reminders = await enqueueUpcomingReminders();
+            const sms = await processPendingSms(100);
+            return JSON.stringify({
+              ok: true,
+              jobsCreated,
+              couponsCreated,
+              ...reminders,
+              smsSent: sms.sent,
+              smsFailed: sms.failed,
+            });
+          })(),
           { headers: { "Content-Type": "application/json" } },
         );
       },

@@ -643,6 +643,63 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_messages: {
+        Row: {
+          attempts: number
+          body: string
+          client_id: string | null
+          created_at: string
+          error: string | null
+          from_number: string | null
+          id: string
+          job_id: string | null
+          kind: string
+          owner_id: string
+          provider_sid: string | null
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string
+          to_number: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body: string
+          client_id?: string | null
+          created_at?: string
+          error?: string | null
+          from_number?: string | null
+          id?: string
+          job_id?: string | null
+          kind: string
+          owner_id: string
+          provider_sid?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          to_number: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string
+          client_id?: string | null
+          created_at?: string
+          error?: string | null
+          from_number?: string | null
+          id?: string
+          job_id?: string | null
+          kind?: string
+          owner_id?: string
+          provider_sid?: string | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string
+          to_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_locations: {
         Row: {
           accuracy_m: number | null

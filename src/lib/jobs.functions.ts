@@ -126,6 +126,13 @@ export const createJob = createServerFn({ method: "POST" })
       .select("*, client:clients(name), team:teams(id, name, color)")
       .single();
     if (error) throw new Error(error.message);
+    // Fire-and-forget confirmation SMS (idempotent per job+kind)
+    try {
+      const { enqueueSmsForJob } = await import("@/lib/sms.server");
+      await enqueueSmsForJob((row as { id: string }).id, "confirmation", { fireNow: true });
+    } catch (e) {
+      console.error("[sms] confirmation enqueue failed", e);
+    }
     return row as unknown as JobRow;
   });
 
@@ -186,6 +193,13 @@ export const updateJobStatus = createServerFn({ method: "POST" })
           });
           if (!invErr) createdInvoice = true;
         }
+      }
+      // Review request SMS (idempotent)
+      try {
+        const { enqueueSmsForJob } = await import("@/lib/sms.server");
+        await enqueueSmsForJob(data.id, "review", { fireNow: true });
+      } catch (e) {
+        console.error("[sms] review enqueue failed", e);
       }
     }
     return { ok: true, createdInvoice };
