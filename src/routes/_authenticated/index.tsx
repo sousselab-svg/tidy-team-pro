@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, Wallet } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, Wallet, Briefcase } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 
@@ -137,6 +137,24 @@ function Dashboard() {
             <div>
               <p className="text-sm font-bold">Relatórios & BI</p>
               <p className="text-[11px] text-muted-foreground">Receita, status e top clientes</p>
+            </div>
+          </div>
+          <ArrowUpRight className="size-4 text-muted-foreground" />
+        </Link>
+      </section>
+
+      <section className="px-5 pt-3">
+        <Link
+          to="/servicos"
+          className="flex items-center justify-between rounded-2xl border border-border bg-card p-4"
+        >
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-full bg-[color:var(--info)]/15 text-[color:var(--info)]">
+              <Briefcase className="size-4" />
+            </span>
+            <div>
+              <p className="text-sm font-bold">Catálogo de serviços</p>
+              <p className="text-[11px] text-muted-foreground">Modelos com preço e duração padrão</p>
             </div>
           </div>
           <ArrowUpRight className="size-4 text-muted-foreground" />
