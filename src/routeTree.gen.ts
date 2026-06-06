@@ -20,6 +20,7 @@ import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
+import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authenticated/equipe.rastrear'
 import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
 
 const DispatchRoute = DispatchRouteImport.update({
@@ -78,6 +79,12 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEquipeRastrearRoute =
+  AuthenticatedEquipeRastrearRouteImport.update({
+    id: '/rastrear',
+    path: '/rastrear',
+    getParentRoute: () => AuthenticatedEquipeRoute,
+  } as any)
 const AuthenticatedAgendaJobIdRoute =
   AuthenticatedAgendaJobIdRouteImport.update({
     id: '/$jobId',
@@ -92,11 +99,12 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/equipe': typeof AuthenticatedEquipeRoute
+  '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
+  '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -104,12 +112,13 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/equipe': typeof AuthenticatedEquipeRoute
+  '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
+  '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -119,12 +128,13 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
+  '/_authenticated/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
+  '/_authenticated/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/portal/$token'
     | '/agenda/$jobId'
+    | '/equipe/rastrear'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/portal/$token'
     | '/'
     | '/agenda/$jobId'
+    | '/equipe/rastrear'
   id:
     | '__root__'
     | '/_authenticated'
@@ -167,6 +179,7 @@ export interface FileRouteTypes {
     | '/portal/$token'
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
+    | '/_authenticated/equipe/rastrear'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -255,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/equipe/rastrear': {
+      id: '/_authenticated/equipe/rastrear'
+      path: '/rastrear'
+      fullPath: '/equipe/rastrear'
+      preLoaderRoute: typeof AuthenticatedEquipeRastrearRouteImport
+      parentRoute: typeof AuthenticatedEquipeRoute
+    }
     '/_authenticated/agenda/$jobId': {
       id: '/_authenticated/agenda/$jobId'
       path: '/$jobId'
@@ -276,11 +296,22 @@ const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
 const AuthenticatedAgendaRouteWithChildren =
   AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
 
+interface AuthenticatedEquipeRouteChildren {
+  AuthenticatedEquipeRastrearRoute: typeof AuthenticatedEquipeRastrearRoute
+}
+
+const AuthenticatedEquipeRouteChildren: AuthenticatedEquipeRouteChildren = {
+  AuthenticatedEquipeRastrearRoute: AuthenticatedEquipeRastrearRoute,
+}
+
+const AuthenticatedEquipeRouteWithChildren =
+  AuthenticatedEquipeRoute._addFileChildren(AuthenticatedEquipeRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
-  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
+  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRouteWithChildren
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -290,7 +321,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
-  AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
+  AuthenticatedEquipeRoute: AuthenticatedEquipeRouteWithChildren,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

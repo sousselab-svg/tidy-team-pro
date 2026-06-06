@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Plus, Trash2, UserPlus, X } from "lucide-react";
+import { MapPin, Plus, Trash2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import {
@@ -70,6 +70,22 @@ function TeamsPage() {
   return (
     <MobileShell>
       <PageHeader eyebrow="Operação" title="Equipes" subtitle={`${teams.length} equipe(s)`} />
+
+      <section className="px-5 pb-2">
+        <Link
+          to="/equipe/rastrear"
+          className="flex items-center justify-between rounded-2xl bg-primary/10 px-4 py-3 ring-1 ring-primary/30"
+        >
+          <div className="flex items-center gap-2">
+            <MapPin className="size-4 text-primary" />
+            <div>
+              <p className="text-sm font-bold text-foreground">Compartilhar localização</p>
+              <p className="text-[11px] text-muted-foreground">Abra no celular para enviar GPS</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-primary">Abrir</span>
+        </Link>
+      </section>
 
       <section className="px-5">
         <form

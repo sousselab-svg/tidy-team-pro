@@ -29,6 +29,7 @@ import {
   type JobStatus,
 } from "@/lib/jobs.functions";
 import { listTeams } from "@/lib/teams.functions";
+import { TeamLiveMap } from "@/components/TeamLiveMap";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -224,6 +225,17 @@ function JobDetailPage() {
               ))}
             </select>
           </section>
+
+          {job.team_id && (() => {
+            const t = (teamsQ.data ?? []).find((x) => x.id === job.team_id);
+            return (
+              <TeamLiveMap
+                teamId={job.team_id}
+                teamName={t?.name ?? job.team?.name ?? "Equipe"}
+                teamColor={t?.color ?? null}
+              />
+            );
+          })()}
 
           <div className="mt-5 space-y-2">
             {meta.next && (
