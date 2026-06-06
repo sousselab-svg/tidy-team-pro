@@ -2,11 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Pause, Play } from "lucide-react";
+import { MapPin, Pause, Play, Radar } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listTeams } from "@/lib/teams.functions";
 import { recordTeamLocation } from "@/lib/team-locations.functions";
+import { autoCheckIn } from "@/lib/geofence.functions";
 
 export const Route = createFileRoute("/_authenticated/equipe/rastrear")({
   head: () => ({ meta: [{ title: "Rastrear equipe — CleanOps" }] }),
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/equipe/rastrear")({
 function TrackerPage() {
   const list = useServerFn(listTeams);
   const ping = useServerFn(recordTeamLocation);
+  const check = useServerFn(autoCheckIn);
   const { data: teams = [] } = useQuery({ queryKey: ["teams"], queryFn: () => list() });
 
   const [teamId, setTeamId] = useState<string>(() =>
@@ -24,6 +26,7 @@ function TrackerPage() {
   const [active, setActive] = useState(false);
   const [lastPos, setLastPos] = useState<{ lat: number; lng: number; acc: number | null; at: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [checkIns, setCheckIns] = useState<Array<{ title: string; to: string; at: number }>>([]);
   const watchRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -56,6 +59,25 @@ function TrackerPage() {
         } catch (e) {
           // Don't toast on every error to avoid spam
           console.error("location ping failed", e);
+        }
+        try {
+          const { transitions } = await check({
+            data: { team_id: teamId, lat: latitude, lng: longitude },
+          });
+          if (transitions.length) {
+            setCheckIns((prev) => [
+              ...transitions.map((t) => ({ title: t.title, to: t.to, at: Date.now() })),
+              ...prev,
+            ].slice(0, 8));
+            for (const t of transitions) {
+              toast.success(
+                t.to === "in_progress" ? "Check-in automático" : "A caminho",
+                { description: `${t.title} · ${t.distance_m} m` },
+              );
+            }
+          }
+        } catch (e) {
+          console.error("auto check-in failed", e);
         }
       },
       (err) => {
