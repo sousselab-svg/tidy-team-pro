@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
+import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
@@ -43,6 +44,12 @@ const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
   path: '/orcamentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFaturamentoRoute =
+  AuthenticatedFaturamentoRouteImport.update({
+    id: '/faturamento',
+    path: '/faturamento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
@@ -83,6 +91,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/clientes'
     | '/configuracoes'
+    | '/faturamento'
     | '/orcamentos'
     | '/agenda/$jobId'
   fileRoutesByTo: FileRoutesByTo
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/clientes'
     | '/configuracoes'
+    | '/faturamento'
     | '/orcamentos'
     | '/agenda/$jobId'
   id:
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agenda'
     | '/_authenticated/clientes'
     | '/_authenticated/configuracoes'
+    | '/_authenticated/faturamento'
     | '/_authenticated/orcamentos'
     | '/_authenticated/agenda/$jobId'
   fileRoutesById: FileRoutesById
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/faturamento': {
+      id: '/_authenticated/faturamento'
+      path: '/faturamento'
+      fullPath: '/faturamento'
+      preLoaderRoute: typeof AuthenticatedFaturamentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/configuracoes': {
       id: '/_authenticated/configuracoes'
       path: '/configuracoes'
@@ -222,6 +242,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
 }
 
@@ -229,6 +250,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
 }
 
