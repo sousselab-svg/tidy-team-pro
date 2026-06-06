@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { DispatchTeam } from "@/lib/dispatch-data";
-import { TEAM_STATUS } from "@/lib/dispatch-data";
+import { MAP_METERS_PER_PERCENT, TEAM_STATUS } from "@/lib/dispatch-data";
 
 /**
  * Visual GPS canvas. Streets are drawn in SVG and team markers drift slightly
@@ -20,6 +20,11 @@ export function DispatchMap({
     const id = setInterval(() => setTick((t) => t + 1), 1500);
     return () => clearInterval(id);
   }, []);
+
+  const selectedTeam = teams.find((t) => t.id === selectedId);
+  const fenceLoc = selectedTeam?.job?.location;
+  const fenceM = selectedTeam?.job?.geofenceM;
+  const fenceR = fenceLoc && fenceM ? fenceM / MAP_METERS_PER_PERCENT : null;
 
   return (
     <div className="relative h-72 w-full overflow-hidden rounded-3xl bg-[color:var(--accent)] ring-1 ring-border">
@@ -47,6 +52,28 @@ export function DispatchMap({
         <text x="81" y="49" textAnchor="middle" fontSize="2.4" fill="var(--primary-dark)" fontWeight="700">
           PARQUE
         </text>
+
+        {/* Geofence ring for selected team's job */}
+        {fenceLoc && fenceR && (
+          <g>
+            <circle
+              cx={fenceLoc.x}
+              cy={fenceLoc.y}
+              r={fenceR}
+              fill="var(--success)"
+              fillOpacity="0.15"
+              stroke="var(--success)"
+              strokeWidth="0.5"
+              strokeDasharray="1.5 1"
+            />
+            <circle
+              cx={fenceLoc.x}
+              cy={fenceLoc.y}
+              r="0.8"
+              fill="var(--success)"
+            />
+          </g>
+        )}
       </svg>
 
       {/* HQ */}
