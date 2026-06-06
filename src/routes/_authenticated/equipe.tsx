@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { MapPin, Plus, Trash2, UserPlus, X } from "lucide-react";
+import { KeyRound, Link2, Link2Off, MapPin, Plus, Trash2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import {
@@ -13,6 +13,12 @@ import {
   removeTeamMember,
   type TeamRow,
 } from "@/lib/teams.functions";
+import {
+  getMyContext,
+  linkOperator,
+  listOrgMembers,
+  unlinkOperator,
+} from "@/lib/team-users.functions";
 
 export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({ meta: [{ title: "Equipe — CleanOps" }] }),
@@ -29,11 +35,23 @@ function TeamsPage() {
   const del = useServerFn(deleteTeam);
   const addMem = useServerFn(addTeamMember);
   const rmMem = useServerFn(removeTeamMember);
+  const meFn = useServerFn(getMyContext);
+  const linkFn = useServerFn(linkOperator);
+  const unlinkFn = useServerFn(unlinkOperator);
+  const listOrg = useServerFn(listOrgMembers);
   const qc = useQueryClient();
   const [newTeam, setNewTeam] = useState("");
   const [openMemberFor, setOpenMemberFor] = useState<TeamRow | null>(null);
+  const [linkFor, setLinkFor] = useState<{ id: string; name: string } | null>(null);
 
   const { data: teams = [] } = useQuery({ ...teamsQuery, queryFn: () => list() });
+  const { data: me } = useQuery({ queryKey: ["my-context"], queryFn: () => meFn(), staleTime: 60_000 });
+  const isAdmin = me?.isAdmin ?? true;
+  const { data: orgMembers = [] } = useQuery({
+    queryKey: ["org-members"],
+    queryFn: () => listOrg(),
+    enabled: isAdmin,
+  });
 
   const createMut = useMutation({
     mutationFn: (name: string) =>
@@ -65,6 +83,27 @@ function TeamsPage() {
   const rmMut = useMutation({
     mutationFn: (id: string) => rmMem({ data: { id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
+  });
+
+  const linkMut = useMutation({
+    mutationFn: (input: { email: string; team_member_id: string }) => linkFn({ data: input }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teams"] });
+      qc.invalidateQueries({ queryKey: ["org-members"] });
+      setLinkFor(null);
+      toast.success("Operador vinculado");
+    },
+    onError: (e) => toast.error("Erro", { description: e.message }),
+  });
+
+  const unlinkMut = useMutation({
+    mutationFn: (user_id: string) => unlinkFn({ data: { user_id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teams"] });
+      qc.invalidateQueries({ queryKey: ["org-members"] });
+      toast.success("Acesso removido");
+    },
+    onError: (e) => toast.error("Erro", { description: e.message }),
   });
 
   return (
@@ -156,13 +195,42 @@ function TeamsPage() {
                           <p className="truncate text-[11px] text-muted-foreground">
                             {[m.role, m.phone].filter(Boolean).join(" · ") || "—"}
                           </p>
+                          {m.user_id && (
+                            <p className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--success)]">
+                              <KeyRound className="size-3" /> Operador vinculado
+                            </p>
+                          )}
                         </div>
-                        <button
-                          onClick={() => rmMut.mutate(m.id)}
-                          className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <X className="size-3.5" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          {isAdmin && (
+                            m.user_id ? (
+                              <button
+                                onClick={() => {
+                                  if (confirm("Remover acesso de operador deste membro?"))
+                                    unlinkMut.mutate(m.user_id!);
+                                }}
+                                className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                aria-label="Desvincular"
+                              >
+                                <Link2Off className="size-3.5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setLinkFor({ id: m.id, name: m.name })}
+                                className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                                aria-label="Vincular operador"
+                              >
+                                <Link2 className="size-3.5" />
+                              </button>
+                            )
+                          )}
+                          <button
+                            onClick={() => rmMut.mutate(m.id)}
+                            className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -180,6 +248,34 @@ function TeamsPage() {
           onClose={() => setOpenMemberFor(null)}
           onSubmit={(p) => addMut.mutate(p)}
         />
+      )}
+
+      {linkFor && (
+        <LinkOperatorSheet
+          memberName={linkFor.name}
+          busy={linkMut.isPending}
+          onClose={() => setLinkFor(null)}
+          onSubmit={(email) => linkMut.mutate({ email, team_member_id: linkFor.id })}
+        />
+      )}
+
+      {isAdmin && orgMembers.length > 0 && (
+        <section className="px-5 pt-7">
+          <h2 className="mb-3 text-sm font-bold">Operadores com acesso</h2>
+          <ul className="space-y-2">
+            {orgMembers.map((m) => (
+              <li key={m.user_id} className="flex items-center justify-between gap-2 rounded-2xl bg-card p-3 ring-1 ring-border">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">{m.team_member_name ?? "—"}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{m.email ?? m.user_id}</p>
+                </div>
+                <span className="rounded-full bg-[color:var(--success)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--success)]">
+                  {m.role}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </MobileShell>
   );
@@ -254,6 +350,46 @@ function Field({
         placeholder={placeholder}
         className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
       />
+    </div>
+  );
+}
+
+function LinkOperatorSheet({
+  memberName,
+  busy,
+  onClose,
+  onSubmit,
+}: {
+  memberName: string;
+  busy: boolean;
+  onClose: () => void;
+  onSubmit: (email: string) => void;
+}) {
+  const [email, setEmail] = useState("");
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur">
+      <div className="w-full max-w-[480px] rounded-t-3xl bg-card p-5 pb-10 ring-1 ring-border">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">Vincular operador · {memberName}</h2>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-full bg-secondary">
+            <X className="size-4" />
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Peça para o operador criar uma conta em <strong>/auth</strong> com o email abaixo, depois confirme aqui.
+        </p>
+        <div className="mt-4 space-y-3">
+          <Field label="Email da conta do operador" value={email} onChange={setEmail} placeholder="operador@exemplo.com" />
+          <button
+            type="button"
+            disabled={!email.trim() || busy}
+            onClick={() => onSubmit(email.trim())}
+            className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
+          >
+            {busy ? "Vinculando…" : "Vincular"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
