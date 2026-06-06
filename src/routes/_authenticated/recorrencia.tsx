@@ -37,7 +37,16 @@ function Page() {
   const [open, setOpen] = useState(false);
 
   const mCreate = useMutation({
-    mutationFn: (v: Parameters<typeof create>[0]) => create(v),
+    mutationFn: (v: {
+      client_id: string;
+      title: string;
+      price_cents: number;
+      duration_minutes: number;
+      frequency: Frequency;
+      time_of_day: string;
+      next_run_on: string;
+      active: boolean;
+    }) => create({ data: v }),
     onSuccess: () => {
       toast.success("Recurring schedule created");
       qc.invalidateQueries({ queryKey: ["recurring"] });
