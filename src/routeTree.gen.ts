@@ -21,6 +21,7 @@ import { Route as AuthenticatedRecorrenciaRouteImport } from './routes/_authenti
 import { Route as AuthenticatedReativacaoRouteImport } from './routes/_authenticated/reativacao'
 import { Route as AuthenticatedPermissoesRouteImport } from './routes/_authenticated/permissoes'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
+import { Route as AuthenticatedOperacaoRouteImport } from './routes/_authenticated/operacao'
 import { Route as AuthenticatedNpsRouteImport } from './routes/_authenticated/nps'
 import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
 import { Route as AuthenticatedIndicacoesRouteImport } from './routes/_authenticated/indicacoes'
@@ -91,6 +92,11 @@ const AuthenticatedPermissoesRoute = AuthenticatedPermissoesRouteImport.update({
 const AuthenticatedOrcamentosRoute = AuthenticatedOrcamentosRouteImport.update({
   id: '/orcamentos',
   path: '/orcamentos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOperacaoRoute = AuthenticatedOperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNpsRoute = AuthenticatedNpsRouteImport.update({
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
   '/nps': typeof AuthenticatedNpsRoute
+  '/operacao': typeof AuthenticatedOperacaoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
   '/reativacao': typeof AuthenticatedReativacaoRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
   '/nps': typeof AuthenticatedNpsRoute
+  '/operacao': typeof AuthenticatedOperacaoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
   '/reativacao': typeof AuthenticatedReativacaoRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/_authenticated/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
   '/_authenticated/nps': typeof AuthenticatedNpsRoute
+  '/_authenticated/operacao': typeof AuthenticatedOperacaoRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/permissoes': typeof AuthenticatedPermissoesRoute
   '/_authenticated/reativacao': typeof AuthenticatedReativacaoRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/indicacoes'
     | '/lembretes'
     | '/nps'
+    | '/operacao'
     | '/orcamentos'
     | '/permissoes'
     | '/reativacao'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/indicacoes'
     | '/lembretes'
     | '/nps'
+    | '/operacao'
     | '/orcamentos'
     | '/permissoes'
     | '/reativacao'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/indicacoes'
     | '/_authenticated/lembretes'
     | '/_authenticated/nps'
+    | '/_authenticated/operacao'
     | '/_authenticated/orcamentos'
     | '/_authenticated/permissoes'
     | '/_authenticated/reativacao'
@@ -397,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamentos'
       fullPath: '/orcamentos'
       preLoaderRoute: typeof AuthenticatedOrcamentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/operacao': {
+      id: '/_authenticated/operacao'
+      path: '/operacao'
+      fullPath: '/operacao'
+      preLoaderRoute: typeof AuthenticatedOperacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/nps': {
@@ -510,6 +529,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndicacoesRoute: typeof AuthenticatedIndicacoesRoute
   AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
   AuthenticatedNpsRoute: typeof AuthenticatedNpsRoute
+  AuthenticatedOperacaoRoute: typeof AuthenticatedOperacaoRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedPermissoesRoute: typeof AuthenticatedPermissoesRoute
   AuthenticatedReativacaoRoute: typeof AuthenticatedReativacaoRoute
@@ -528,6 +548,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndicacoesRoute: AuthenticatedIndicacoesRoute,
   AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
   AuthenticatedNpsRoute: AuthenticatedNpsRoute,
+  AuthenticatedOperacaoRoute: AuthenticatedOperacaoRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedPermissoesRoute: AuthenticatedPermissoesRoute,
   AuthenticatedReativacaoRoute: AuthenticatedReativacaoRoute,
