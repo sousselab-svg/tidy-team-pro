@@ -42,6 +42,7 @@ const STATUS_META: Record<QuoteRow["status"], { label: string; cls: string }> = 
 };
 
 function QuotesPage() {
+  const { t } = useTranslation();
   const listQ = useServerFn(listQuotes);
   const listC = useServerFn(listClients);
   const create = useServerFn(createQuote);
@@ -103,9 +104,9 @@ function QuotesPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Vendas"
-        title="Orçamentos"
-        subtitle={`${quotes.length} no total`}
+        eyebrow={t("quotes.eyebrow")}
+        title={t("quotes.title")}
+        subtitle={t("quotes.subtitle", { count: quotes.length })}
         right={
           <button
             onClick={() => setOpen(true)}

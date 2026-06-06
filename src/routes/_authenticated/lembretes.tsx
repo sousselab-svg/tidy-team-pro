@@ -88,6 +88,7 @@ function waLink(phone: string | null, message: string) {
 }
 
 function RemindersPage() {
+  const { t } = useTranslation();
   const listFn = useServerFn(listReminders);
   const settingsFn = useServerFn(getSettings);
   const { data: items } = useQuery({ ...remindersQuery, queryFn: () => listFn() });
@@ -110,9 +111,9 @@ function RemindersPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Atendimento"
-        title="Lembretes"
-        subtitle="Mensagens prontas para enviar pelo WhatsApp"
+        eyebrow={t("reminders.eyebrow")}
+        title={t("reminders.title")}
+        subtitle={t("reminders.subtitle")}
       />
 
       <div className="flex gap-2 overflow-x-auto px-5 pb-3">

@@ -103,9 +103,9 @@ function BillingPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Finanças"
-        title="Faturamento"
-        subtitle={`${brl(paid)} recebido · ${brl(openSum)} em aberto`}
+        eyebrow={t("billing.eyebrow")}
+        title={t("billing.title")}
+        subtitle={`${brl(paid)} · ${brl(openSum)}`}
         right={
           <button onClick={() => setOpen(true)} className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow">
             <Plus className="size-5" />
@@ -143,7 +143,7 @@ function BillingPage() {
                       <h3 className="truncate text-base font-semibold">{inv.title}</h3>
                       {inv.due_date && (
                         <p className="text-[11px] text-muted-foreground">
-                          Vence {formatDate(inv.due_date)}
+                          {t("billing.due", { date: formatDate(inv.due_date) })}
                         </p>
                       )}
                     </div>

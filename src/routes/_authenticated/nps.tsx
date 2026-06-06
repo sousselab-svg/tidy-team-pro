@@ -14,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/nps")({
 });
 
 function NpsPage() {
+  const { t } = useTranslation();
   const fn = useServerFn(listNps);
   const { data, isLoading } = useQuery({ queryKey: ["nps-list"], queryFn: () => fn() });
 
@@ -30,9 +31,9 @@ function NpsPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="CleanOps"
-        title="Avaliações NPS"
-        subtitle={`${answered.length} resposta(s) de ${rows.length} envio(s)`}
+        eyebrow={t("nps.eyebrow")}
+        title={t("nps.title")}
+        subtitle={`${answered.length} / ${rows.length}`}
         right={
           <Link
             to="/"

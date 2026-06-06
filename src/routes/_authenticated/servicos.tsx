@@ -20,6 +20,7 @@ const brl = (cents: number) =>
 const servicesQuery = queryOptions({ queryKey: ["services"], queryFn: () => listServices() });
 
 function ServicesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const fnList = useServerFn(listServices);
   const fnUpsert = useServerFn(upsertService);
@@ -62,9 +63,9 @@ function ServicesPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Cadastros"
-        title="Catálogo de serviços"
-        subtitle="Modelos com preço e duração padrão"
+        eyebrow={t("services.eyebrow")}
+        title={t("services.title")}
+        subtitle={t("services.subtitle")}
         right={
           <button
             onClick={() =>

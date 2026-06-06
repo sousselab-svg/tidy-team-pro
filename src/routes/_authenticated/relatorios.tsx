@@ -47,6 +47,7 @@ function downloadCsv(filename: string, rows: (string | number)[][]) {
 }
 
 function ReportsPage() {
+  const { t } = useTranslation();
   const fn = useServerFn(getReports);
   const [months, setMonths] = useState(6);
   const options = useMemo(
@@ -74,9 +75,9 @@ function ReportsPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="BI"
-        title="Relatórios"
-        subtitle="Receita, serviços e clientes"
+        eyebrow={t("reports.eyebrow")}
+        title={t("reports.title")}
+        subtitle={t("dashboard.reportsSubtitle")}
         right={
           data ? (
             <button
