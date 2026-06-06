@@ -22,9 +22,12 @@ import {
   deleteJob as deleteJobFn,
   getJob,
   updateJob as updateJobFn,
+  updateJobChecklist,
+  type ChecklistItem,
   type JobRow,
   type JobStatus,
 } from "@/lib/jobs.functions";
+import { listTeams } from "@/lib/teams.functions";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -70,11 +73,13 @@ function JobDetailPage() {
   const update = useServerFn(updateJobFn);
   const del = useServerFn(deleteJobFn);
   const listC = useServerFn(listClients);
+  const listT = useServerFn(listTeams);
 
   const [editing, setEditing] = useState(false);
 
   const jobQ = useQuery({ queryKey: ["job", jobId], queryFn: () => get({ data: { id: jobId } }) });
   const clientsQ = useQuery({ queryKey: ["clients"], queryFn: () => listC(), enabled: editing });
+  const teamsQ = useQuery({ queryKey: ["teams"], queryFn: () => listT() });
 
   const updateMut = useMutation({
     mutationFn: (patch: JobPatch) => update({ data: { id: jobId, patch } }),
@@ -185,7 +190,7 @@ function JobDetailPage() {
             <Row
               icon={<Users className="size-4" />}
               label="Equipe"
-              value={job.team_name || "Não atribuída"}
+              value={job.team?.name || job.team_name || "Não atribuída"}
             />
             <Row
               icon={<span className="font-bold">$</span>}
@@ -201,6 +206,8 @@ function JobDetailPage() {
               <Row icon={<Phone className="size-4" />} label="Notas" value={job.notes} />
             )}
           </dl>
+
+          <ChecklistSection jobId={job.id} initial={job.checklist ?? []} />
 
           <div className="mt-5 space-y-2">
             {meta.next && (
