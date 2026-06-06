@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowUpRight, Bell, Calendar, FileText, MapPin, Plus, Wallet } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, Wallet } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 
@@ -124,6 +124,24 @@ function Dashboard() {
           </Link>
         </section>
       )}
+
+      <section className="px-5 pt-5">
+        <Link
+          to="/relatorios"
+          className="flex items-center justify-between rounded-2xl border border-border bg-card p-4"
+        >
+          <div className="flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-full bg-primary/15 text-primary">
+              <BarChart3 className="size-4" />
+            </span>
+            <div>
+              <p className="text-sm font-bold">Relatórios & BI</p>
+              <p className="text-[11px] text-muted-foreground">Receita, status e top clientes</p>
+            </div>
+          </div>
+          <ArrowUpRight className="size-4 text-muted-foreground" />
+        </Link>
+      </section>
 
       <section className="px-5 pt-7">
         <div className="mb-3 flex items-end justify-between">
