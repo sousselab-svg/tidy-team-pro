@@ -1,6 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Radio, Users, FileText, Wallet } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Home, Calendar, Radio, Users, FileText, Wallet, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const nav = [
   { to: "/", label: "Painel", Icon: Home },
@@ -54,6 +56,16 @@ export function PageHeader({
   subtitle?: string;
   right?: ReactNode;
 }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
   return (
     <header className="px-5 pt-8 pb-4">
       <div className="flex items-start justify-between gap-3">
@@ -68,7 +80,16 @@ export function PageHeader({
             <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        {right}
+        <div className="flex items-center gap-2">
+          {right}
+          <button
+            onClick={signOut}
+            aria-label="Sair"
+            className="grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
+          >
+            <LogOut className="size-4" />
+          </button>
+        </div>
       </div>
     </header>
   );

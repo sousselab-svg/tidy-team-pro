@@ -14,7 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          address: string | null
+          client_id: string | null
+          created_at: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          owner_id: string
+          price_cents: number
+          scheduled_at: string
+          status: string
+          team_name: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          client_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          owner_id: string
+          price_cents?: number
+          scheduled_at: string
+          status?: string
+          team_name?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          client_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          price_cents?: number
+          scheduled_at?: string
+          status?: string
+          team_name?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
