@@ -52,6 +52,7 @@ type JobPatch = {
   duration_minutes?: number;
   price_cents?: number;
   team_name?: string | null;
+  team_id?: string | null;
   notes?: string | null;
   status?: JobStatus;
 };
