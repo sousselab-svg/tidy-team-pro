@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
-import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
@@ -217,6 +217,32 @@ function Dashboard() {
           </div>
           <ArrowUpRight className="size-4 text-muted-foreground" />
         </Link>
+      </section>
+
+      <section className="px-5 pt-6">
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          Growth
+        </h2>
+        <div className="grid grid-cols-3 gap-2">
+          <Link to="/recorrencia" className="flex flex-col items-start gap-2 rounded-2xl bg-card p-3 ring-1 ring-border">
+            <span className="grid size-9 place-items-center rounded-full bg-primary/15 text-primary">
+              <Repeat className="size-4" />
+            </span>
+            <p className="text-[11px] font-bold leading-tight">Recurring</p>
+          </Link>
+          <Link to="/indicacoes" className="flex flex-col items-start gap-2 rounded-2xl bg-card p-3 ring-1 ring-border">
+            <span className="grid size-9 place-items-center rounded-full bg-[color:var(--warning)]/15 text-[color:var(--warning)]">
+              <Gift className="size-4" />
+            </span>
+            <p className="text-[11px] font-bold leading-tight">Referrals</p>
+          </Link>
+          <Link to="/reativacao" className="flex flex-col items-start gap-2 rounded-2xl bg-card p-3 ring-1 ring-border">
+            <span className="grid size-9 place-items-center rounded-full bg-[color:var(--info)]/15 text-[color:var(--info)]">
+              <Sparkles className="size-4" />
+            </span>
+            <p className="text-[11px] font-bold leading-tight">Win-back</p>
+          </Link>
+        </div>
       </section>
 
       <section className="px-5 pt-7">
