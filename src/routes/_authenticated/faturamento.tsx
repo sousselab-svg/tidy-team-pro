@@ -62,6 +62,8 @@ function BillingPage() {
     mutationFn: (id: string) => confirm({ data: { id } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["invoices"] });
+      qc.invalidateQueries({ queryKey: ["pending-proofs-count"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
       toast.success("Pagamento confirmado");
     },
   });

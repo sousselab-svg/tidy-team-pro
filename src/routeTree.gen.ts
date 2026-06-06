@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
@@ -35,10 +35,10 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const PortalTokenRoute = PortalTokenRouteImport.update({
   id: '/portal/$token',
@@ -80,7 +80,7 @@ const AuthenticatedAgendaJobIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -92,7 +92,6 @@ export interface FileRoutesByFullPath {
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
@@ -101,11 +100,11 @@ export interface FileRoutesByTo {
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
+  '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
@@ -115,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/portal/$token': typeof PortalTokenRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRouteTypes {
@@ -132,7 +132,6 @@ export interface FileRouteTypes {
     | '/agenda/$jobId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/auth'
     | '/dispatch'
     | '/agenda'
@@ -141,10 +140,10 @@ export interface FileRouteTypes {
     | '/faturamento'
     | '/orcamentos'
     | '/portal/$token'
+    | '/'
     | '/agenda/$jobId'
   id:
     | '__root__'
-    | '/'
     | '/_authenticated'
     | '/auth'
     | '/dispatch'
@@ -154,11 +153,11 @@ export interface FileRouteTypes {
     | '/_authenticated/faturamento'
     | '/_authenticated/orcamentos'
     | '/portal/$token'
+    | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DispatchRoute: typeof DispatchRoute
@@ -188,12 +187,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/portal/$token': {
       id: '/portal/$token'
@@ -264,6 +263,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -272,13 +272,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DispatchRoute: DispatchRoute,
@@ -287,13 +287,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

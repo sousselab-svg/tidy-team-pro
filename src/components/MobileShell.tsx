@@ -2,7 +2,9 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Home, Calendar, Radio, Users, FileText, Wallet, LogOut, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getPendingProofsCount } from "@/lib/dashboard.functions";
 
 const nav = [
   { to: "/", label: "Painel", Icon: Home },
@@ -15,6 +17,15 @@ const nav = [
 
 export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const fn = useServerFn(getPendingProofsCount);
+  const { data } = useQuery({
+    queryKey: ["pending-proofs-count"],
+    queryFn: () => fn().catch(() => ({ count: 0 })),
+    retry: false,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const proofsCount = data?.count ?? 0;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[480px] min-h-screen pb-24">{children}</div>
@@ -22,16 +33,24 @@ export function MobileShell({ children }: { children: ReactNode }) {
         <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-2 pt-2 pb-5">
           {nav.map(({ to, label, Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+            const showBadge = to === "/faturamento" && proofsCount > 0;
             return (
               <li key={to} className="flex-1">
                 <Link
                   to={to}
                   className="flex flex-col items-center gap-0.5 py-1 text-[9px] font-semibold uppercase tracking-tight"
                 >
-                  <Icon
-                    className="size-5"
-                    style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }}
-                  />
+                  <span className="relative">
+                    <Icon
+                      className="size-5"
+                      style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }}
+                    />
+                    {showBadge && (
+                      <span className="absolute -top-1 -right-2 grid min-w-4 h-4 px-1 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                        {proofsCount}
+                      </span>
+                    )}
+                  </span>
                   <span style={{ color: active ? "var(--primary)" : "var(--muted-foreground)" }}>
                     {label}
                   </span>

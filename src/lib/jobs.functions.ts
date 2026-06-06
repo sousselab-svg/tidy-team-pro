@@ -120,7 +120,36 @@ export const updateJobStatus = createServerFn({ method: "POST" })
       .update({ status: data.status })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
-    return { ok: true };
+
+    // Auto-create invoice when job is completed (only once, only if priced and has client)
+    let createdInvoice = false;
+    if (data.status === "completed") {
+      const { data: job } = await context.supabase
+        .from("jobs")
+        .select("id, client_id, title, price_cents")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (job && job.client_id && job.price_cents > 0) {
+        const { data: existing } = await context.supabase
+          .from("invoices")
+          .select("id")
+          .eq("job_id", job.id)
+          .neq("status", "cancelled")
+          .maybeSingle();
+        if (!existing) {
+          const { error: invErr } = await context.supabase.from("invoices").insert({
+            owner_id: context.userId,
+            client_id: job.client_id,
+            job_id: job.id,
+            title: job.title,
+            amount_cents: job.price_cents,
+            status: "open",
+          });
+          if (!invErr) createdInvoice = true;
+        }
+      }
+    }
+    return { ok: true, createdInvoice };
   });
 
 export const deleteJob = createServerFn({ method: "POST" })

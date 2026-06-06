@@ -66,6 +66,46 @@ export const createInvoice = createServerFn({ method: "POST" })
     return row as unknown as InvoiceRow;
   });
 
+export const createInvoiceFromQuote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ quoteId: z.string().uuid(), due_date: z.string().date().nullable().optional() }).parse(raw),
+  )
+  .handler(async ({ context, data }): Promise<InvoiceRow> => {
+    const { data: quote, error: qErr } = await context.supabase
+      .from("quotes")
+      .select("id, client_id, title, total_cents, status")
+      .eq("id", data.quoteId)
+      .maybeSingle();
+    if (qErr) throw new Error(qErr.message);
+    if (!quote) throw new Error("Orçamento não encontrado");
+    if (quote.status !== "approved") throw new Error("Orçamento precisa estar aprovado");
+
+    const { data: existing } = await context.supabase
+      .from("invoices")
+      .select("id")
+      .eq("quote_id", quote.id)
+      .neq("status", "cancelled")
+      .maybeSingle();
+    if (existing) throw new Error("Já existe fatura para este orçamento");
+
+    const { data: row, error } = await context.supabase
+      .from("invoices")
+      .insert({
+        owner_id: context.userId,
+        client_id: quote.client_id,
+        quote_id: quote.id,
+        title: quote.title,
+        amount_cents: quote.total_cents,
+        due_date: data.due_date ?? null,
+        status: "open",
+      })
+      .select("*, client:clients(name, portal_token)")
+      .single();
+    if (error) throw new Error(error.message);
+    return row as unknown as InvoiceRow;
+  });
+
 export const confirmInvoicePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
