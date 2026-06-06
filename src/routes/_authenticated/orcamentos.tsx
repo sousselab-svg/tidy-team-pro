@@ -15,6 +15,7 @@ import {
   type QuoteRow,
 } from "@/lib/quotes.functions";
 import { createInvoiceFromQuote } from "@/lib/invoices.functions";
+import { listServices, type ServiceItem } from "@/lib/services.functions";
 
 export const Route = createFileRoute("/_authenticated/orcamentos")({
   head: () => ({ meta: [{ title: "Orçamentos — CleanOps" }] }),
@@ -23,6 +24,10 @@ export const Route = createFileRoute("/_authenticated/orcamentos")({
 
 const quotesQuery = queryOptions({ queryKey: ["quotes"], queryFn: () => listQuotes() });
 const clientsQuery = queryOptions({ queryKey: ["clients"], queryFn: () => listClients() });
+const servicesQueryOpts = queryOptions({
+  queryKey: ["services", "active"],
+  queryFn: () => listServices({ data: { onlyActive: true } }),
+});
 
 const brl = (cents: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
@@ -45,6 +50,11 @@ function QuotesPage() {
 
   const { data: quotes = [] } = useQuery({ ...quotesQuery, queryFn: () => listQ() });
   const { data: clients = [] } = useQuery({ ...clientsQuery, queryFn: () => listC() });
+  const listS = useServerFn(listServices);
+  const { data: services = [] } = useQuery({
+    ...servicesQueryOpts,
+    queryFn: () => listS({ data: { onlyActive: true } }),
+  });
 
   const createMut = useMutation({
     mutationFn: (input: { client_id: string; title: string; items: QuoteItem[]; valid_until: string | null; notes: string | null }) =>
@@ -173,6 +183,7 @@ function QuotesPage() {
       {open && (
         <NewQuoteSheet
           clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          services={services}
           onClose={() => setOpen(false)}
           onSubmit={(payload) => createMut.mutate(payload)}
           busy={createMut.isPending}
