@@ -15,6 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell } from "@/components/MobileShell";
 import { listClients } from "@/lib/clients.functions";
