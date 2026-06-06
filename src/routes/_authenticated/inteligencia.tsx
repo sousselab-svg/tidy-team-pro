@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Brain, Sparkles, AlertTriangle, RefreshCw, TrendingDown, UserX } from "lucide-react";
+import { Brain, Sparkles, RefreshCw, TrendingDown, UserX } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { aiDailySummary, aiRiskScan, type RiskItem } from "@/lib/ai.functions";
 
@@ -183,6 +183,3 @@ function RiskRow({ item }: { item: RiskItem }) {
     </li>
   );
 }
-
-// satisfy unused-import lint when AlertTriangle unused elsewhere
-void AlertTriangle;
