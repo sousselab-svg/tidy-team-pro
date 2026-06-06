@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Copy, Plus, Send, Trash2, X } from "lucide-react";
+import { Copy, FileCheck, Plus, Send, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listClients } from "@/lib/clients.functions";
@@ -14,6 +14,7 @@ import {
   type QuoteItem,
   type QuoteRow,
 } from "@/lib/quotes.functions";
+import { createInvoiceFromQuote } from "@/lib/invoices.functions";
 
 export const Route = createFileRoute("/_authenticated/orcamentos")({
   head: () => ({ meta: [{ title: "Orçamentos — CleanOps" }] }),
@@ -62,6 +63,17 @@ function QuotesPage() {
       qc.invalidateQueries({ queryKey: ["quotes"] });
       toast.success("Orçamento marcado como enviado");
     },
+  });
+
+  const genInvoice = useServerFn(createInvoiceFromQuote);
+  const genInvoiceMut = useMutation({
+    mutationFn: (quoteId: string) => genInvoice({ data: { quoteId } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      toast.success("Fatura gerada", { description: "Veja em Finanças" });
+    },
+    onError: (e) => toast.error("Erro", { description: e.message }),
   });
 
   const delMut = useMutation({
@@ -132,6 +144,15 @@ function QuotesPage() {
                           className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
                         >
                           <Send className="size-3" /> Enviar
+                        </button>
+                      )}
+                      {q.status === "approved" && (
+                        <button
+                          onClick={() => genInvoiceMut.mutate(q.id)}
+                          disabled={genInvoiceMut.isPending}
+                          className="flex items-center gap-1 rounded-full bg-[color:var(--success)] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                        >
+                          <FileCheck className="size-3" /> Gerar fatura
                         </button>
                       )}
                       <button
