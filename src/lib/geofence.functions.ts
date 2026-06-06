@@ -98,13 +98,12 @@ export const autoCheckIn = createServerFn({ method: "POST" })
       const dist = haversineM({ lat: data.lat, lng: data.lng }, { lat: j.lat, lng: j.lng });
       const radius = j.geofence_radius_m ?? 150;
       if (dist <= radius) {
-        const patch: Record<string, unknown> = {
-          status: "in_progress",
-          arrived_at: j.arrived_at ?? now.toISOString(),
-        };
         const { error: uErr } = await context.supabase
           .from("jobs")
-          .update(patch)
+          .update({
+            status: "in_progress",
+            arrived_at: j.arrived_at ?? now.toISOString(),
+          })
           .eq("id", j.id);
         if (!uErr) {
           transitions.push({
