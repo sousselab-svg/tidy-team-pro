@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
 import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, Star, Wallet, Briefcase } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
+import { getMyContext } from "@/lib/team-users.functions";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -30,7 +32,28 @@ const STATUS_LABEL: Record<string, { label: string; tint: string }> = {
 
 function Dashboard() {
   const fn = useServerFn(getDashboardStats);
-  const { data, isLoading } = useQuery({ ...statsQuery, queryFn: () => fn() });
+  const meFn = useServerFn(getMyContext);
+  const navigate = useNavigate();
+  const { data: me } = useQuery({ queryKey: ["my-context"], queryFn: () => meFn(), staleTime: 60_000, retry: false });
+  const isOperator = me?.role === "operator";
+
+  useEffect(() => {
+    if (isOperator) navigate({ to: "/agenda", replace: true });
+  }, [isOperator, navigate]);
+
+  const { data, isLoading } = useQuery({
+    ...statsQuery,
+    queryFn: () => fn(),
+    enabled: !isOperator,
+  });
+
+  if (isOperator) {
+    return (
+      <MobileShell>
+        <div className="p-8 text-center text-sm text-muted-foreground">Redirecionando…</div>
+      </MobileShell>
+    );
+  }
 
   const todayJobs = data?.todayJobs ?? [];
   const upcoming = data?.upcomingJobs ?? [];
