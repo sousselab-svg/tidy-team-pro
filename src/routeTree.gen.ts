@@ -9,26 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as OrcamentosRouteImport } from './routes/orcamentos'
-import { Route as FaturamentoRouteImport } from './routes/faturamento'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
 
-const OrcamentosRoute = OrcamentosRouteImport.update({
-  id: '/orcamentos',
-  path: '/orcamentos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaturamentoRoute = FaturamentoRouteImport.update({
-  id: '/faturamento',
-  path: '/faturamento',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DispatchRoute = DispatchRouteImport.update({
   id: '/dispatch',
   path: '/dispatch',
@@ -48,6 +37,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedConfiguracoesRoute =
+  AuthenticatedConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -69,20 +64,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
-  '/faturamento': typeof FaturamentoRoute
-  '/orcamentos': typeof OrcamentosRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
-  '/faturamento': typeof FaturamentoRoute
-  '/orcamentos': typeof OrcamentosRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRoutesById {
@@ -91,10 +84,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
-  '/faturamento': typeof FaturamentoRoute
-  '/orcamentos': typeof OrcamentosRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
+  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
 }
 export interface FileRouteTypes {
@@ -103,20 +95,18 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dispatch'
-    | '/faturamento'
-    | '/orcamentos'
     | '/agenda'
     | '/clientes'
+    | '/configuracoes'
     | '/agenda/$jobId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/dispatch'
-    | '/faturamento'
-    | '/orcamentos'
     | '/agenda'
     | '/clientes'
+    | '/configuracoes'
     | '/agenda/$jobId'
   id:
     | '__root__'
@@ -124,10 +114,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/dispatch'
-    | '/faturamento'
-    | '/orcamentos'
     | '/_authenticated/agenda'
     | '/_authenticated/clientes'
+    | '/_authenticated/configuracoes'
     | '/_authenticated/agenda/$jobId'
   fileRoutesById: FileRoutesById
 }
@@ -136,26 +125,10 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DispatchRoute: typeof DispatchRoute
-  FaturamentoRoute: typeof FaturamentoRoute
-  OrcamentosRoute: typeof OrcamentosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/orcamentos': {
-      id: '/orcamentos'
-      path: '/orcamentos'
-      fullPath: '/orcamentos'
-      preLoaderRoute: typeof OrcamentosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faturamento': {
-      id: '/faturamento'
-      path: '/faturamento'
-      fullPath: '/faturamento'
-      preLoaderRoute: typeof FaturamentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dispatch': {
       id: '/dispatch'
       path: '/dispatch'
@@ -183,6 +156,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/configuracoes': {
+      id: '/_authenticated/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/clientes': {
       id: '/_authenticated/clientes'
@@ -222,11 +202,13 @@ const AuthenticatedAgendaRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
+  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
+  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -237,9 +219,17 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DispatchRoute: DispatchRoute,
-  FaturamentoRoute: FaturamentoRoute,
-  OrcamentosRoute: OrcamentosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
