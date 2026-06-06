@@ -18,6 +18,7 @@ import { Route as NpsTokenRouteImport } from './routes/nps.$token'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedRecorrenciaRouteImport } from './routes/_authenticated/recorrencia'
+import { Route as AuthenticatedReativacaoRouteImport } from './routes/_authenticated/reativacao'
 import { Route as AuthenticatedPermissoesRouteImport } from './routes/_authenticated/permissoes'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedNpsRouteImport } from './routes/_authenticated/nps'
@@ -76,6 +77,11 @@ const AuthenticatedRecorrenciaRoute =
     path: '/recorrencia',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReativacaoRoute = AuthenticatedReativacaoRouteImport.update({
+  id: '/reativacao',
+  path: '/reativacao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPermissoesRoute = AuthenticatedPermissoesRouteImport.update({
   id: '/permissoes',
   path: '/permissoes',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
+  '/reativacao': typeof AuthenticatedReativacaoRoute
   '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
+  '/reativacao': typeof AuthenticatedReativacaoRoute
   '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/_authenticated/nps': typeof AuthenticatedNpsRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/permissoes': typeof AuthenticatedPermissoesRoute
+  '/_authenticated/reativacao': typeof AuthenticatedReativacaoRoute
   '/_authenticated/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/nps'
     | '/orcamentos'
     | '/permissoes'
+    | '/reativacao'
     | '/recorrencia'
     | '/relatorios'
     | '/servicos'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/nps'
     | '/orcamentos'
     | '/permissoes'
+    | '/reativacao'
     | '/recorrencia'
     | '/relatorios'
     | '/servicos'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/_authenticated/nps'
     | '/_authenticated/orcamentos'
     | '/_authenticated/permissoes'
+    | '/_authenticated/reativacao'
     | '/_authenticated/recorrencia'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
@@ -350,6 +362,13 @@ declare module '@tanstack/react-router' {
       path: '/recorrencia'
       fullPath: '/recorrencia'
       preLoaderRoute: typeof AuthenticatedRecorrenciaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reativacao': {
+      id: '/_authenticated/reativacao'
+      path: '/reativacao'
+      fullPath: '/reativacao'
+      preLoaderRoute: typeof AuthenticatedReativacaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/permissoes': {
@@ -472,6 +491,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNpsRoute: typeof AuthenticatedNpsRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedPermissoesRoute: typeof AuthenticatedPermissoesRoute
+  AuthenticatedReativacaoRoute: typeof AuthenticatedReativacaoRoute
   AuthenticatedRecorrenciaRoute: typeof AuthenticatedRecorrenciaRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
@@ -489,6 +509,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNpsRoute: AuthenticatedNpsRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedPermissoesRoute: AuthenticatedPermissoesRoute,
+  AuthenticatedReativacaoRoute: AuthenticatedReativacaoRoute,
   AuthenticatedRecorrenciaRoute: AuthenticatedRecorrenciaRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
