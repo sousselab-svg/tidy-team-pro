@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_credits: {
+        Row: {
+          balance_cents: number
+          client_id: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance_cents?: number
+          client_id: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance_cents?: number
+          client_id?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           address: string | null
@@ -26,6 +47,7 @@ export type Database = {
           owner_id: string
           phone: string | null
           portal_token: string
+          referral_code: string | null
           updated_at: string
         }
         Insert: {
@@ -39,6 +61,7 @@ export type Database = {
           owner_id: string
           phone?: string | null
           portal_token?: string
+          referral_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -52,6 +75,7 @@ export type Database = {
           owner_id?: string
           phone?: string | null
           portal_token?: string
+          referral_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -64,6 +88,9 @@ export type Database = {
           owner_id: string
           pix_instructions: string | null
           pix_key: string | null
+          reactivation_days: number
+          reactivation_discount_cents: number
+          referral_credit_cents: number
           updated_at: string
         }
         Insert: {
@@ -73,6 +100,9 @@ export type Database = {
           owner_id: string
           pix_instructions?: string | null
           pix_key?: string | null
+          reactivation_days?: number
+          reactivation_discount_cents?: number
+          referral_credit_cents?: number
           updated_at?: string
         }
         Update: {
@@ -82,6 +112,9 @@ export type Database = {
           owner_id?: string
           pix_instructions?: string | null
           pix_key?: string | null
+          reactivation_days?: number
+          reactivation_discount_cents?: number
+          referral_credit_cents?: number
           updated_at?: string
         }
         Relationships: []
@@ -375,6 +408,156 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reactivation_coupons: {
+        Row: {
+          client_id: string
+          code: string
+          created_at: string
+          discount_cents: number
+          expires_on: string
+          id: string
+          owner_id: string
+          redeemed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          code: string
+          created_at?: string
+          discount_cents?: number
+          expires_on: string
+          id?: string
+          owner_id: string
+          redeemed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          code?: string
+          created_at?: string
+          discount_cents?: number
+          expires_on?: string
+          id?: string
+          owner_id?: string
+          redeemed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recurring_schedules: {
+        Row: {
+          active: boolean
+          address: string | null
+          client_id: string
+          created_at: string
+          day_of_month: number | null
+          day_of_week: number | null
+          duration_minutes: number
+          frequency: string
+          id: string
+          last_generated_at: string | null
+          next_run_on: string
+          notes: string | null
+          owner_id: string
+          price_cents: number
+          team_id: string | null
+          time_of_day: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          client_id: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          duration_minutes?: number
+          frequency: string
+          id?: string
+          last_generated_at?: string | null
+          next_run_on: string
+          notes?: string | null
+          owner_id: string
+          price_cents?: number
+          team_id?: string | null
+          time_of_day?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          client_id?: string
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          duration_minutes?: number
+          frequency?: string
+          id?: string
+          last_generated_at?: string | null
+          next_run_on?: string
+          notes?: string | null
+          owner_id?: string
+          price_cents?: number
+          team_id?: string | null
+          time_of_day?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          code: string
+          created_at: string
+          credit_cents: number
+          earned_at: string | null
+          id: string
+          owner_id: string
+          redeemed_at: string | null
+          referred_client_id: string | null
+          referred_email: string | null
+          referred_name: string | null
+          referrer_client_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          credit_cents?: number
+          earned_at?: string | null
+          id?: string
+          owner_id: string
+          redeemed_at?: string | null
+          referred_client_id?: string | null
+          referred_email?: string | null
+          referred_name?: string | null
+          referrer_client_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          credit_cents?: number
+          earned_at?: string | null
+          id?: string
+          owner_id?: string
+          redeemed_at?: string | null
+          referred_client_id?: string | null
+          referred_email?: string | null
+          referred_name?: string | null
+          referrer_client_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       role_permissions: {
         Row: {

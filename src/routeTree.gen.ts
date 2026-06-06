@@ -17,10 +17,13 @@ import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as NpsTokenRouteImport } from './routes/nps.$token'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as AuthenticatedRecorrenciaRouteImport } from './routes/_authenticated/recorrencia'
+import { Route as AuthenticatedReativacaoRouteImport } from './routes/_authenticated/reativacao'
 import { Route as AuthenticatedPermissoesRouteImport } from './routes/_authenticated/permissoes'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedNpsRouteImport } from './routes/_authenticated/nps'
 import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
+import { Route as AuthenticatedIndicacoesRouteImport } from './routes/_authenticated/indicacoes'
 import { Route as AuthenticatedFaturamentoRouteImport } from './routes/_authenticated/faturamento'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
@@ -28,6 +31,7 @@ import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authenticated/equipe.rastrear'
 import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
+import { Route as ApiPublicHooksGrowthCronRouteImport } from './routes/api/public/hooks/growth-cron'
 
 const DispatchRoute = DispatchRouteImport.update({
   id: '/dispatch',
@@ -68,6 +72,17 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRecorrenciaRoute =
+  AuthenticatedRecorrenciaRouteImport.update({
+    id: '/recorrencia',
+    path: '/recorrencia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReativacaoRoute = AuthenticatedReativacaoRouteImport.update({
+  id: '/reativacao',
+  path: '/reativacao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPermissoesRoute = AuthenticatedPermissoesRouteImport.update({
   id: '/permissoes',
   path: '/permissoes',
@@ -86,6 +101,11 @@ const AuthenticatedNpsRoute = AuthenticatedNpsRouteImport.update({
 const AuthenticatedLembretesRoute = AuthenticatedLembretesRouteImport.update({
   id: '/lembretes',
   path: '/lembretes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedIndicacoesRoute = AuthenticatedIndicacoesRouteImport.update({
+  id: '/indicacoes',
+  path: '/indicacoes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedFaturamentoRoute =
@@ -127,6 +147,12 @@ const AuthenticatedAgendaJobIdRoute =
     path: '/$jobId',
     getParentRoute: () => AuthenticatedAgendaRoute,
   } as any)
+const ApiPublicHooksGrowthCronRoute =
+  ApiPublicHooksGrowthCronRouteImport.update({
+    id: '/api/public/hooks/growth-cron',
+    path: '/api/public/hooks/growth-cron',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -137,16 +163,20 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
+  '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
   '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
+  '/reativacao': typeof AuthenticatedReativacaoRoute
+  '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -156,10 +186,13 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/faturamento': typeof AuthenticatedFaturamentoRoute
+  '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
   '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
+  '/reativacao': typeof AuthenticatedReativacaoRoute
+  '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/nps/$token': typeof NpsTokenRoute
@@ -167,6 +200,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,10 +212,13 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRouteWithChildren
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
+  '/_authenticated/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
   '/_authenticated/nps': typeof AuthenticatedNpsRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/permissoes': typeof AuthenticatedPermissoesRoute
+  '/_authenticated/reativacao': typeof AuthenticatedReativacaoRoute
+  '/_authenticated/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/nps/$token': typeof NpsTokenRoute
@@ -189,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/_authenticated/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,16 +239,20 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/equipe'
     | '/faturamento'
+    | '/indicacoes'
     | '/lembretes'
     | '/nps'
     | '/orcamentos'
     | '/permissoes'
+    | '/reativacao'
+    | '/recorrencia'
     | '/relatorios'
     | '/servicos'
     | '/nps/$token'
     | '/portal/$token'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
+    | '/api/public/hooks/growth-cron'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -220,10 +262,13 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/equipe'
     | '/faturamento'
+    | '/indicacoes'
     | '/lembretes'
     | '/nps'
     | '/orcamentos'
     | '/permissoes'
+    | '/reativacao'
+    | '/recorrencia'
     | '/relatorios'
     | '/servicos'
     | '/nps/$token'
@@ -231,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
+    | '/api/public/hooks/growth-cron'
   id:
     | '__root__'
     | '/_authenticated'
@@ -241,10 +287,13 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes'
     | '/_authenticated/equipe'
     | '/_authenticated/faturamento'
+    | '/_authenticated/indicacoes'
     | '/_authenticated/lembretes'
     | '/_authenticated/nps'
     | '/_authenticated/orcamentos'
     | '/_authenticated/permissoes'
+    | '/_authenticated/reativacao'
+    | '/_authenticated/recorrencia'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
     | '/nps/$token'
@@ -252,6 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
     | '/_authenticated/equipe/rastrear'
+    | '/api/public/hooks/growth-cron'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,6 +310,7 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
+  ApiPublicHooksGrowthCronRoute: typeof ApiPublicHooksGrowthCronRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -320,6 +371,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/recorrencia': {
+      id: '/_authenticated/recorrencia'
+      path: '/recorrencia'
+      fullPath: '/recorrencia'
+      preLoaderRoute: typeof AuthenticatedRecorrenciaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reativacao': {
+      id: '/_authenticated/reativacao'
+      path: '/reativacao'
+      fullPath: '/reativacao'
+      preLoaderRoute: typeof AuthenticatedReativacaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/permissoes': {
       id: '/_authenticated/permissoes'
       path: '/permissoes'
@@ -346,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/lembretes'
       fullPath: '/lembretes'
       preLoaderRoute: typeof AuthenticatedLembretesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/indicacoes': {
+      id: '/_authenticated/indicacoes'
+      path: '/indicacoes'
+      fullPath: '/indicacoes'
+      preLoaderRoute: typeof AuthenticatedIndicacoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/faturamento': {
@@ -397,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaJobIdRouteImport
       parentRoute: typeof AuthenticatedAgendaRoute
     }
+    '/api/public/hooks/growth-cron': {
+      id: '/api/public/hooks/growth-cron'
+      path: '/api/public/hooks/growth-cron'
+      fullPath: '/api/public/hooks/growth-cron'
+      preLoaderRoute: typeof ApiPublicHooksGrowthCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -428,10 +507,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRouteWithChildren
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
+  AuthenticatedIndicacoesRoute: typeof AuthenticatedIndicacoesRoute
   AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
   AuthenticatedNpsRoute: typeof AuthenticatedNpsRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedPermissoesRoute: typeof AuthenticatedPermissoesRoute
+  AuthenticatedReativacaoRoute: typeof AuthenticatedReativacaoRoute
+  AuthenticatedRecorrenciaRoute: typeof AuthenticatedRecorrenciaRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -443,10 +525,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRouteWithChildren,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
+  AuthenticatedIndicacoesRoute: AuthenticatedIndicacoesRoute,
   AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
   AuthenticatedNpsRoute: AuthenticatedNpsRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedPermissoesRoute: AuthenticatedPermissoesRoute,
+  AuthenticatedReativacaoRoute: AuthenticatedReativacaoRoute,
+  AuthenticatedRecorrenciaRoute: AuthenticatedRecorrenciaRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -461,6 +546,7 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
+  ApiPublicHooksGrowthCronRoute: ApiPublicHooksGrowthCronRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
