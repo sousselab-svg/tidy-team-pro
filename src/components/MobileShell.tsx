@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Calendar, Users, FileText, Wallet } from "lucide-react";
+import { Home, Calendar, Radio, FileText, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 
 const nav = [
   { to: "/", label: "Painel", Icon: Home },
   { to: "/agenda", label: "Agenda", Icon: Calendar },
-  { to: "/clientes", label: "Clientes", Icon: Users },
+  { to: "/dispatch", label: "Dispatch", Icon: Radio },
   { to: "/orcamentos", label: "Orçamentos", Icon: FileText },
   { to: "/faturamento", label: "Finanças", Icon: Wallet },
 ] as const;
