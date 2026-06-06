@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Copy, FileCheck, Plus, Send, Trash2, X } from "lucide-react";
+import { Copy, FileCheck, Plus, Send, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listClients } from "@/lib/clients.functions";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/quotes.functions";
 import { createInvoiceFromQuote } from "@/lib/invoices.functions";
 import { listServices, type ServiceItem } from "@/lib/services.functions";
+import { aiDraftQuote } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/orcamentos")({
   head: () => ({ meta: [{ title: "Quotes — CleanOps" }] }),
@@ -214,6 +215,18 @@ function NewQuoteSheet({
   const [items, setItems] = useState<QuoteItem[]>([{ description: "", qty: 1, unit_price_cents: 0 }]);
   const [validUntil, setValidUntil] = useState("");
   const [notes, setNotes] = useState("");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const draftFn = useServerFn(aiDraftQuote);
+  const draftMut = useMutation({
+    mutationFn: (description: string) => draftFn({ data: { description } }),
+    onSuccess: (d) => {
+      setTitle(d.title);
+      setItems(d.items.length > 0 ? d.items : items);
+      setNotes(d.notes);
+      toast.success("Rascunho gerado pela IA");
+    },
+    onError: (e) => toast.error("Falha na IA", { description: (e as Error).message }),
+  });
 
   const total = items.reduce((s, it) => s + Math.round(it.qty * it.unit_price_cents), 0);
   const canSubmit = !!clientId && title.trim().length > 0 && items.every((i) => i.description.trim() && i.qty > 0);
@@ -232,6 +245,27 @@ function NewQuoteSheet({
           <p className="mt-6 text-sm text-muted-foreground">Cadastre um cliente primeiro em Clientes.</p>
         ) : (
           <div className="mt-4 space-y-3">
+            <div className="rounded-xl bg-primary/5 p-3 ring-1 ring-primary/20">
+              <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
+                <Sparkles className="size-3" /> AI quote draft
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Ex: limpeza profunda de 3 quartos + 2 banheiros, com janelas e geladeira por dentro."
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                className="mt-1.5 w-full rounded-lg bg-card px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                disabled={aiPrompt.trim().length < 5 || draftMut.isPending}
+                onClick={() => draftMut.mutate(aiPrompt.trim())}
+                className="mt-2 w-full rounded-lg bg-primary py-2 text-xs font-bold text-primary-foreground disabled:opacity-50"
+              >
+                {draftMut.isPending ? "Gerando…" : "Gerar com IA"}
+              </button>
+            </div>
+
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Cliente</label>
               <select
