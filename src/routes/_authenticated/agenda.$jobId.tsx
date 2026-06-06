@@ -59,6 +59,8 @@ type JobPatch = {
   team_id?: string | null;
   notes?: string | null;
   status?: JobStatus;
+  geofence_radius_m?: number;
+  auto_check_in_enabled?: boolean;
 };
 
 function brl(cents: number) {
