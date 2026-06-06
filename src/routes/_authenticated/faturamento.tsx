@@ -36,6 +36,7 @@ const STATUS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
 };
 
 function BillingPage() {
+  const { t } = useTranslation();
   const listI = useServerFn(listInvoices);
   const listC = useServerFn(listClients);
   const create = useServerFn(createInvoice);
