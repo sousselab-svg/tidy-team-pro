@@ -1,10 +1,55 @@
-import { useEffect, useState } from "react";
+/// <reference types="google.maps" />
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { DispatchTeam } from "@/lib/dispatch-data";
 import { MAP_METERS_PER_PERCENT, TEAM_STATUS } from "@/lib/dispatch-data";
+import { loadGoogleMaps, MAP_CENTER, percentToLatLng } from "@/lib/google-maps-loader";
+
+const DARK_STYLE: google.maps.MapTypeStyle[] = [
+  { elementType: "geometry", stylers: [{ color: "#1f2421" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#9aa39d" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#1f2421" }] },
+  { featureType: "administrative", elementType: "geometry", stylers: [{ visibility: "off" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#2a322d" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#343d37" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#4a5750" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#7d8a83" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#10302a" }] },
+  { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#1f2421" }] },
+];
+
+function teamPinSvg(color: string, label: string): string {
+  const safe = label.replace(/[<>&"']/g, "");
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="68" viewBox="0 0 56 68">
+  <defs>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g filter="url(#s)">
+    <path d="M28 66 L18 46 A18 18 0 1 1 38 46 Z" fill="${color}"/>
+    <circle cx="28" cy="28" r="14" fill="white"/>
+    <text x="28" y="33" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-size="14" font-weight="800" fill="${color}">${safe}</text>
+  </g>
+</svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function hqPinSvg(): string {
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
+  <rect x="6" y="6" width="32" height="32" rx="8" fill="#0f1311" stroke="white" stroke-width="2"/>
+  <text x="22" y="27" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-size="12" font-weight="800" fill="white">HQ</text>
+</svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
 
 /**
- * Visual GPS canvas. Streets are drawn in SVG and team markers drift slightly
- * to simulate real-time movement until the real Google Maps connector is wired.
+ * Real-time Google Maps canvas. Teams are plotted from their mock %
+ * coordinates, and "on_way" teams drift slightly every tick to simulate live
+ * GPS movement until backend GPS feeds are wired up.
  */
 export function DispatchMap({
   teams,
@@ -15,126 +60,183 @@ export function DispatchMap({
   selectedId?: string;
   onSelect?: (id: string) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
+  const hqRef = useRef<google.maps.Marker | null>(null);
+  const fenceRef = useRef<google.maps.Circle | null>(null);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1500);
     return () => clearInterval(id);
   }, []);
 
-  const selectedTeam = teams.find((t) => t.id === selectedId);
-  const fenceLoc = selectedTeam?.job?.location;
-  const fenceM = selectedTeam?.job?.geofenceM;
-  const fenceR = fenceLoc && fenceM ? fenceM / MAP_METERS_PER_PERCENT : null;
+  // Init map once
+  useEffect(() => {
+    let cancelled = false;
+    loadGoogleMaps()
+      .then((g) => {
+        if (cancelled || !containerRef.current) return;
+        mapRef.current = new g.maps.Map(containerRef.current, {
+          center: MAP_CENTER,
+          zoom: 15,
+          disableDefaultUI: true,
+          gestureHandling: "greedy",
+          clickableIcons: false,
+          backgroundColor: "#1f2421",
+          styles: DARK_STYLE,
+        });
+        hqRef.current = new g.maps.Marker({
+          position: MAP_CENTER,
+          map: mapRef.current,
+          icon: {
+            url: hqPinSvg(),
+            scaledSize: new g.maps.Size(36, 36),
+            anchor: new g.maps.Point(18, 18),
+          },
+          zIndex: 50,
+        });
+        setReady(true);
+      })
+      .catch((err: Error) => setError(err.message));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const selected = useMemo(
+    () => teams.find((t) => t.id === selectedId),
+    [teams, selectedId],
+  );
+
+  // Sync team markers
+  useEffect(() => {
+    if (!ready || !mapRef.current || !window.google) return;
+    const g = window.google;
+    const map = mapRef.current;
+    const seen = new Set<string>();
+
+    teams.forEach((team, i) => {
+      seen.add(team.id);
+      const meta = TEAM_STATUS[team.status];
+      // Drift only for moving teams to simulate live GPS
+      const drift =
+        team.status === "on_way"
+          ? { x: Math.sin(tick / 2 + i) * 1.2, y: Math.cos(tick / 2 + i) * 1.2 }
+          : { x: 0, y: 0 };
+      const pos = percentToLatLng({
+        x: team.position.x + drift.x,
+        y: team.position.y + drift.y,
+      });
+      const label = team.name.replace("Equipe ", "").slice(0, 1).toUpperCase();
+      const color =
+        team.status === "on_way"
+          ? "#f59e0b"
+          : team.status === "in_progress"
+            ? "#3b82f6"
+            : team.status === "completed"
+              ? "#16a34a"
+              : team.status === "cancelled"
+                ? "#dc2626"
+                : "#64748b";
+      void meta;
+
+      let marker = markersRef.current.get(team.id);
+      if (!marker) {
+        marker = new g.maps.Marker({
+          map,
+          position: pos,
+          icon: {
+            url: teamPinSvg(color, label),
+            scaledSize: new g.maps.Size(44, 54),
+            anchor: new g.maps.Point(22, 54),
+          },
+          zIndex: team.id === selectedId ? 100 : 10,
+        });
+        marker.addListener("click", () => onSelect?.(team.id));
+        markersRef.current.set(team.id, marker);
+      } else {
+        marker.setPosition(pos);
+        marker.setIcon({
+          url: teamPinSvg(color, label),
+          scaledSize: new g.maps.Size(44, 54),
+          anchor: new g.maps.Point(22, 54),
+        });
+        marker.setZIndex(team.id === selectedId ? 100 : 10);
+        marker.setAnimation(
+          team.status === "on_way" ? g.maps.Animation.BOUNCE : null,
+        );
+      }
+    });
+
+    // Remove markers that disappeared
+    for (const [id, marker] of markersRef.current) {
+      if (!seen.has(id)) {
+        marker.setMap(null);
+        markersRef.current.delete(id);
+      }
+    }
+  }, [teams, tick, ready, selectedId, onSelect]);
+
+  // Geofence circle for selected team
+  useEffect(() => {
+    if (!ready || !mapRef.current || !window.google) return;
+    const g = window.google;
+    const map = mapRef.current;
+
+    const job = selected?.job;
+    if (!job?.location || !job.geofenceM) {
+      fenceRef.current?.setMap(null);
+      fenceRef.current = null;
+      return;
+    }
+
+    const center = percentToLatLng(job.location);
+    if (!fenceRef.current) {
+      fenceRef.current = new g.maps.Circle({
+        map,
+        center,
+        radius: job.geofenceM,
+        strokeColor: "#16a34a",
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: "#16a34a",
+        fillOpacity: 0.15,
+        clickable: false,
+      });
+    } else {
+      fenceRef.current.setMap(map);
+      fenceRef.current.setCenter(center);
+      fenceRef.current.setRadius(job.geofenceM);
+    }
+    map.panTo(center);
+  }, [selected, ready]);
+
+  // Avoid unused-var warning for shared constant
+  void MAP_METERS_PER_PERCENT;
 
   return (
     <div className="relative h-72 w-full overflow-hidden rounded-3xl bg-[color:var(--accent)] ring-1 ring-border">
-      {/* Street grid */}
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-        <defs>
-          <pattern id="grid" width="14" height="14" patternUnits="userSpaceOnUse">
-            <path d="M 14 0 L 0 0 0 14" fill="none" stroke="white" strokeOpacity="0.6" strokeWidth="0.4" />
-          </pattern>
-        </defs>
-        <rect width="100" height="100" fill="url(#grid)" />
-        {/* Main roads */}
-        <path d="M0 50 L100 50" stroke="white" strokeWidth="2.2" strokeOpacity="0.9" />
-        <path d="M55 0 L55 100" stroke="white" strokeWidth="2.2" strokeOpacity="0.9" />
-        <path d="M0 22 L100 22" stroke="white" strokeWidth="1.2" strokeOpacity="0.7" />
-        <path d="M20 0 L20 100" stroke="white" strokeWidth="1.2" strokeOpacity="0.7" />
-        {/* River */}
-        <path
-          d="M0 85 Q30 75 50 88 T100 80 L100 100 L0 100 Z"
-          fill="var(--info)"
-          fillOpacity="0.18"
-        />
-        {/* Park */}
-        <rect x="70" y="38" width="22" height="18" rx="2" fill="var(--primary)" fillOpacity="0.18" />
-        <text x="81" y="49" textAnchor="middle" fontSize="2.4" fill="var(--primary-dark)" fontWeight="700">
-          PARQUE
-        </text>
-
-        {/* Geofence ring for selected team's job */}
-        {fenceLoc && fenceR && (
-          <g>
-            <circle
-              cx={fenceLoc.x}
-              cy={fenceLoc.y}
-              r={fenceR}
-              fill="var(--success)"
-              fillOpacity="0.15"
-              stroke="var(--success)"
-              strokeWidth="0.5"
-              strokeDasharray="1.5 1"
-            />
-            <circle
-              cx={fenceLoc.x}
-              cy={fenceLoc.y}
-              r="0.8"
-              fill="var(--success)"
-            />
-          </g>
-        )}
-      </svg>
-
-      {/* HQ */}
-      <div
-        className="absolute -translate-x-1/2 -translate-y-1/2"
-        style={{ left: "50%", top: "50%" }}
-        aria-label="Sede"
-      >
-        <div className="flex flex-col items-center gap-1">
-          <span className="grid size-7 place-items-center rounded-md bg-foreground text-[10px] font-bold text-background ring-2 ring-background">
-            HQ
-          </span>
+      <div ref={containerRef} className="absolute inset-0 h-full w-full" />
+      {!ready && !error && (
+        <div className="absolute inset-0 grid place-items-center bg-[color:var(--accent)]">
+          <p className="text-xs font-semibold text-muted-foreground">Carregando mapa…</p>
         </div>
-      </div>
-
-      {/* Team markers */}
-      {teams.map((team, i) => {
-        const meta = TEAM_STATUS[team.status];
-        const drift = team.status === "on_way" ? Math.sin(tick / 2 + i) * 1.5 : 0;
-        const selected = team.id === selectedId;
-        return (
-          <button
-            key={team.id}
-            type="button"
-            onClick={() => onSelect?.(team.id)}
-            className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 ease-linear focus:outline-none"
-            style={{
-              left: `${team.position.x + drift}%`,
-              top: `${team.position.y + drift / 2}%`,
-              zIndex: selected ? 20 : 10,
-            }}
-          >
-            {team.status === "on_way" && (
-              <span
-                className="absolute inset-0 -z-10 animate-ping rounded-full"
-                style={{ backgroundColor: meta.color, opacity: 0.35 }}
-              />
-            )}
-            <span
-              className="flex items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-bold text-background shadow-lg ring-2 ring-background"
-              style={{ backgroundColor: meta.color }}
-            >
-              <span className="grid size-4 place-items-center rounded-full bg-background/25 text-[9px]">
-                {team.name.split(" ")[1]?.[0] ?? "?"}
-              </span>
-              {team.name.replace("Equipe ", "")}
-            </span>
-          </button>
-        );
-      })}
-
-      {/* Legend */}
-      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-background/85 px-2.5 py-1 text-[10px] font-semibold text-foreground backdrop-blur ring-1 ring-border">
+      )}
+      {error && (
+        <div className="absolute inset-0 grid place-items-center bg-[color:var(--accent)] p-4 text-center">
+          <p className="text-xs font-semibold text-destructive">Mapa indisponível: {error}</p>
+        </div>
+      )}
+      <div className="pointer-events-none absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-background/85 px-2.5 py-1 text-[10px] font-semibold text-foreground backdrop-blur ring-1 ring-border">
         <span className="relative grid size-2 place-items-center">
           <span className="absolute inset-0 animate-ping rounded-full bg-[color:var(--success)] opacity-75" />
           <span className="relative size-2 rounded-full bg-[color:var(--success)]" />
         </span>
-        Ao vivo
-      </div>
-      <div className="absolute bottom-2 right-2 rounded-full bg-background/85 px-2.5 py-1 text-[10px] font-mono font-semibold text-muted-foreground backdrop-blur ring-1 ring-border">
-        São Paulo · Centro
+        Ao vivo · Google Maps
       </div>
     </div>
   );
