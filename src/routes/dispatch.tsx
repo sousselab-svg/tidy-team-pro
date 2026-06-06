@@ -168,7 +168,16 @@ function DispatchPage() {
       </section>
 
       <section className="px-5 pt-5">
-        <DispatchMap teams={teams} selectedId={selectedId} onSelect={setSelectedId} />
+        <DispatchMap
+          teams={teams}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onPing={(teamId, position) => {
+            setTeams((prev) =>
+              prev.map((t) => (t.id === teamId ? { ...t, position } : t)),
+            );
+          }}
+        />
       </section>
 
       <section className="px-5 pt-5">
