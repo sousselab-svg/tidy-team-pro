@@ -209,6 +209,20 @@ function JobDetailPage() {
 
           <ChecklistSection jobId={job.id} initial={job.checklist ?? []} />
 
+          <section className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-border">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Equipe responsável</p>
+            <select
+              value={job.team_id ?? ""}
+              onChange={(e) => updateMut.mutate({ team_id: e.target.value || null })}
+              className="mt-2 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">— sem equipe —</option>
+              {(teamsQ.data ?? []).map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </section>
+
           <div className="mt-5 space-y-2">
             {meta.next && (
               <button
