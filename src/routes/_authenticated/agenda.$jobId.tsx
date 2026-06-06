@@ -32,6 +32,7 @@ import { listTeams } from "@/lib/teams.functions";
 import { TeamLiveMap } from "@/components/TeamLiveMap";
 import { geocodeJob } from "@/lib/geofence.functions";
 import { Radar } from "lucide-react";
+import { JobPhotos } from "@/components/JobPhotos";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -225,6 +226,8 @@ function JobDetailPage() {
           </dl>
 
           <ChecklistSection jobId={job.id} initial={job.checklist ?? []} />
+
+          <JobPhotos jobId={job.id} />
 
           <section className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-border">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Equipe responsável</p>
