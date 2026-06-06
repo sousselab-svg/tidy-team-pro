@@ -5,8 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPendingProofsCount } from "@/lib/dashboard.functions";
+import { getMyContext } from "@/lib/team-users.functions";
 
-const nav = [
+const adminNav = [
   { to: "/", label: "Painel", Icon: Home },
   { to: "/agenda", label: "Agenda", Icon: Calendar },
   { to: "/lembretes", label: "Lembretes", Icon: Bell },
@@ -15,15 +16,28 @@ const nav = [
   { to: "/faturamento", label: "Finanças", Icon: Wallet },
 ] as const;
 
+const operatorNav = [
+  { to: "/agenda", label: "Agenda", Icon: Calendar },
+] as const;
+
 export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const fn = useServerFn(getPendingProofsCount);
+  const ctxFn = useServerFn(getMyContext);
+  const { data: me } = useQuery({
+    queryKey: ["my-context"],
+    queryFn: () => ctxFn(),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const nav = me?.role === "operator" ? operatorNav : adminNav;
   const { data } = useQuery({
     queryKey: ["pending-proofs-count"],
     queryFn: () => fn().catch(() => ({ count: 0 })),
     retry: false,
     staleTime: 30_000,
     refetchOnWindowFocus: true,
+    enabled: me?.role !== "operator",
   });
   const proofsCount = data?.count ?? 0;
   return (
