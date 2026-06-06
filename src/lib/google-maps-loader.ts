@@ -31,7 +31,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
     const channelParam = channel ? `&channel=${encodeURIComponent(channel)}` : "";
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
       key,
-    )}&loading=async&callback=${callbackName}${channelParam}`;
+    )}&loading=async&libraries=geometry&callback=${callbackName}${channelParam}`;
     script.async = true;
     script.defer = true;
     script.onerror = () => {
@@ -54,5 +54,13 @@ export function percentToLatLng(p: { x: number; y: number }): google.maps.LatLng
   return {
     lat: MAP_CENTER.lat + (50 - p.y) * (SPAN_DEG / 100),
     lng: MAP_CENTER.lng + (p.x - 50) * (SPAN_DEG / 100),
+  };
+}
+
+/** Inverse of `percentToLatLng`. */
+export function latLngToPercent(ll: google.maps.LatLngLiteral): { x: number; y: number } {
+  return {
+    x: 50 + ((ll.lng - MAP_CENTER.lng) * 100) / SPAN_DEG,
+    y: 50 - ((ll.lat - MAP_CENTER.lat) * 100) / SPAN_DEG,
   };
 }

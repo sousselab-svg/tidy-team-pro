@@ -1,8 +1,15 @@
 /// <reference types="google.maps" />
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import type { DispatchTeam } from "@/lib/dispatch-data";
-import { MAP_METERS_PER_PERCENT, TEAM_STATUS } from "@/lib/dispatch-data";
-import { loadGoogleMaps, MAP_CENTER, percentToLatLng } from "@/lib/google-maps-loader";
+import { TEAM_STATUS } from "@/lib/dispatch-data";
+import {
+  latLngToPercent,
+  loadGoogleMaps,
+  MAP_CENTER,
+  percentToLatLng,
+} from "@/lib/google-maps-loader";
+import { getTeamRoutes } from "@/lib/dispatch-routes.functions";
 
 const DARK_STYLE: google.maps.MapTypeStyle[] = [
   { elementType: "geometry", stylers: [{ color: "#1f2421" }] },
@@ -55,22 +62,36 @@ export function DispatchMap({
   teams,
   selectedId,
   onSelect,
+  onPing,
 }: {
   teams: DispatchTeam[];
   selectedId?: string;
   onSelect?: (id: string) => void;
+  /** Emitted with the team's current GPS position on every animation tick. */
+  onPing?: (teamId: string, position: { x: number; y: number }) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const hqRef = useRef<google.maps.Marker | null>(null);
   const fenceRef = useRef<google.maps.Circle | null>(null);
+  const polylinesRef = useRef<Map<string, google.maps.Polyline>>(new Map());
+  /** Decoded route path per team (in road-following order). */
+  const routePathsRef = useRef<Map<string, google.maps.LatLng[]>>(new Map());
+  /** Cumulative segment distances for fast interpolation. */
+  const routeDistRef = useRef<Map<string, { cum: number[]; total: number }>>(
+    new Map(),
+  );
+  /** Progress 0..1 along each team's route. */
+  const progressRef = useRef<Map<string, number>>(new Map());
+  const fetchRoutes = useServerFn(getTeamRoutes);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+  const [routesLoaded, setRoutesLoaded] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 1500);
+    const id = setInterval(() => setTick((t) => t + 1), 1200);
     return () => clearInterval(id);
   }, []);
 
@@ -107,10 +128,82 @@ export function DispatchMap({
     };
   }, []);
 
+  // Fetch real driving routes from Google Routes API once the map is ready.
+  useEffect(() => {
+    if (!ready || !window.google) return;
+    let cancelled = false;
+    fetchRoutes()
+      .then((res) => {
+        if (cancelled || !window.google) return;
+        const decode = window.google.maps.geometry?.encoding?.decodePath;
+        const spherical = window.google.maps.geometry?.spherical;
+        if (!decode || !spherical) return;
+        for (const r of res.routes) {
+          const path = decode(r.encodedPolyline);
+          if (path.length < 2) continue;
+          routePathsRef.current.set(r.teamId, path);
+          // Pre-compute cumulative segment distances for smooth interpolation.
+          const cum: number[] = [0];
+          for (let i = 1; i < path.length; i++) {
+            cum.push(
+              cum[i - 1] +
+                spherical.computeDistanceBetween(path[i - 1], path[i]),
+            );
+          }
+          routeDistRef.current.set(r.teamId, {
+            cum,
+            total: cum[cum.length - 1] || 1,
+          });
+          progressRef.current.set(r.teamId, 0);
+
+          // Visualize the route faintly on the map.
+          const existing = polylinesRef.current.get(r.teamId);
+          existing?.setMap(null);
+          const poly = new window.google.maps.Polyline({
+            map: mapRef.current,
+            path,
+            geodesic: false,
+            strokeColor: "#f59e0b",
+            strokeOpacity: 0.55,
+            strokeWeight: 3,
+          });
+          polylinesRef.current.set(r.teamId, poly);
+        }
+        setRoutesLoaded((n) => n + 1);
+      })
+      .catch((err) => console.error("Failed to load team routes", err));
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, fetchRoutes]);
+
   const selected = useMemo(
     () => teams.find((t) => t.id === selectedId),
     [teams, selectedId],
   );
+
+  /** Returns interpolated lat/lng at a given progress (0..1) on a route. */
+  function pointAlong(
+    teamId: string,
+    progress: number,
+  ): google.maps.LatLng | null {
+    const path = routePathsRef.current.get(teamId);
+    const meta = routeDistRef.current.get(teamId);
+    if (!path || !meta || !window.google) return null;
+    const spherical = window.google.maps.geometry.spherical;
+    const target = meta.total * Math.min(Math.max(progress, 0), 1);
+    // Binary-search segment that contains `target`.
+    let lo = 0;
+    let hi = meta.cum.length - 1;
+    while (lo < hi - 1) {
+      const mid = (lo + hi) >> 1;
+      if (meta.cum[mid] <= target) lo = mid;
+      else hi = mid;
+    }
+    const segLen = meta.cum[hi] - meta.cum[lo] || 1;
+    const t = (target - meta.cum[lo]) / segLen;
+    return spherical.interpolate(path[lo], path[hi], t);
+  }
 
   // Sync team markers
   useEffect(() => {
@@ -119,18 +212,29 @@ export function DispatchMap({
     const map = mapRef.current;
     const seen = new Set<string>();
 
-    teams.forEach((team, i) => {
+    teams.forEach((team) => {
       seen.add(team.id);
       const meta = TEAM_STATUS[team.status];
-      // Drift only for moving teams to simulate live GPS
-      const drift =
-        team.status === "on_way"
-          ? { x: Math.sin(tick / 2 + i) * 1.2, y: Math.cos(tick / 2 + i) * 1.2 }
-          : { x: 0, y: 0 };
-      const pos = percentToLatLng({
-        x: team.position.x + drift.x,
-        y: team.position.y + drift.y,
-      });
+
+      // Advance real route progress for moving teams (≈ 4% of route per tick
+      // ≈ a couple of street blocks). For other states, hold position.
+      let pos: google.maps.LatLng | google.maps.LatLngLiteral;
+      if (team.status === "on_way" && routePathsRef.current.has(team.id)) {
+        const prev = progressRef.current.get(team.id) ?? 0;
+        const next = Math.min(prev + 0.04, 1);
+        progressRef.current.set(team.id, next);
+        const interp = pointAlong(team.id, next);
+        if (interp) {
+          pos = interp;
+          // Report the live GPS ping upstream so geofence + cards react.
+          onPing?.(team.id, latLngToPercent(interp.toJSON()));
+        } else {
+          pos = percentToLatLng(team.position);
+        }
+      } else {
+        pos = percentToLatLng(team.position);
+      }
+
       const label = team.name.replace("Equipe ", "").slice(0, 1).toUpperCase();
       const color =
         team.status === "on_way"
@@ -166,9 +270,7 @@ export function DispatchMap({
           anchor: new g.maps.Point(22, 54),
         });
         marker.setZIndex(team.id === selectedId ? 100 : 10);
-        marker.setAnimation(
-          team.status === "on_way" ? g.maps.Animation.BOUNCE : null,
-        );
+        marker.setAnimation(null);
       }
     });
 
@@ -177,9 +279,14 @@ export function DispatchMap({
       if (!seen.has(id)) {
         marker.setMap(null);
         markersRef.current.delete(id);
+        polylinesRef.current.get(id)?.setMap(null);
+        polylinesRef.current.delete(id);
+        routePathsRef.current.delete(id);
+        routeDistRef.current.delete(id);
+        progressRef.current.delete(id);
       }
     }
-  }, [teams, tick, ready, selectedId, onSelect]);
+  }, [teams, tick, ready, selectedId, onSelect, onPing, routesLoaded]);
 
   // Geofence circle for selected team
   useEffect(() => {
@@ -215,9 +322,6 @@ export function DispatchMap({
     map.panTo(center);
   }, [selected, ready]);
 
-  // Avoid unused-var warning for shared constant
-  void MAP_METERS_PER_PERCENT;
-
   return (
     <div className="relative h-72 w-full overflow-hidden rounded-3xl bg-[color:var(--accent)] ring-1 ring-border">
       <div ref={containerRef} className="absolute inset-0 h-full w-full" />
@@ -236,7 +340,7 @@ export function DispatchMap({
           <span className="absolute inset-0 animate-ping rounded-full bg-[color:var(--success)] opacity-75" />
           <span className="relative size-2 rounded-full bg-[color:var(--success)]" />
         </span>
-        Ao vivo · Google Maps
+        GPS ao vivo · Google Routes
       </div>
     </div>
   );
