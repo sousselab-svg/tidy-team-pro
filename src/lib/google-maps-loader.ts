@@ -1,3 +1,11 @@
+/// <reference types="google.maps" />
+
+declare global {
+  interface Window {
+    google?: typeof google;
+  }
+}
+
 let loaderPromise: Promise<typeof google> | null = null;
 
 /** Loads the Google Maps JS API once and resolves with the global `google`. */
