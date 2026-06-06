@@ -25,7 +25,7 @@ const invoicesQuery = queryOptions({ queryKey: ["invoices"], queryFn: () => list
 const clientsQuery = queryOptions({ queryKey: ["clients"], queryFn: () => listClients() });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const STATUS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
   open: { label: "Em aberto", cls: "bg-[color:var(--info)]/15 text-[color:var(--info)]" },

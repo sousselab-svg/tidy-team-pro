@@ -30,7 +30,7 @@ const servicesQueryOpts = queryOptions({
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const STATUS_META: Record<QuoteRow["status"], { label: string; cls: string }> = {
   draft: { label: "Rascunho", cls: "bg-secondary text-muted-foreground" },
@@ -266,7 +266,7 @@ function NewQuoteSheet({
                       <option value="">— do catálogo —</option>
                       {services.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.name} · {(s.default_price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                          {s.name} · {formatCurrency(s.default_price_cents)}
                         </option>
                       ))}
                     </select>

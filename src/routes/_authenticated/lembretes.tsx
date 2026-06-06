@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/lembretes")({
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const remindersQuery = queryOptions({ queryKey: ["reminders"], queryFn: () => listReminders() });
 const settingsQuery = queryOptions({ queryKey: ["settings"], queryFn: () => getSettings() });

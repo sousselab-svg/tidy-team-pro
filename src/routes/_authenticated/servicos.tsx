@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/servicos")({
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const servicesQuery = queryOptions({ queryKey: ["services"], queryFn: () => listServices() });
 
