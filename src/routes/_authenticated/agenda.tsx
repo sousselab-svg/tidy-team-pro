@@ -11,6 +11,7 @@ import {
   type JobRow,
   type JobStatus,
 } from "@/lib/jobs.functions";
+import { listServices, type ServiceItem } from "@/lib/services.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/agenda")({
@@ -53,6 +54,11 @@ function AgendaPage() {
 
   const jobsQ = useQuery({ queryKey: ["jobs"], queryFn: () => list() });
   const clientsQ = useQuery({ queryKey: ["clients"], queryFn: () => listC() });
+  const listS = useServerFn(listServices);
+  const servicesQ = useQuery({
+    queryKey: ["services", "active"],
+    queryFn: () => listS({ data: { onlyActive: true } }),
+  });
 
   const dayJobs = useMemo(() => {
     const start = new Date(day);
@@ -148,6 +154,7 @@ function AgendaPage() {
       {open && (
         <NewJobSheet
           clients={clientsQ.data ?? []}
+          services={servicesQ.data ?? []}
           defaultDay={day}
           onClose={() => setOpen(false)}
           onSubmit={(payload) => createMut.mutate(payload)}
@@ -217,12 +224,14 @@ type CreateJobPayload = {
 
 function NewJobSheet({
   clients,
+  services,
   defaultDay,
   onClose,
   onSubmit,
   busy,
 }: {
   clients: ClientRow[];
+  services: ServiceItem[];
   defaultDay: Date;
   onClose: () => void;
   onSubmit: (data: CreateJobPayload) => void;
@@ -288,6 +297,34 @@ function NewJobSheet({
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {services.length > 0 && (
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Do catálogo
+              </label>
+              <select
+                value=""
+                onChange={(e) => {
+                  const s = services.find((x) => x.id === e.target.value);
+                  if (!s) return;
+                  setForm({
+                    ...form,
+                    title: s.name,
+                    duration_minutes: s.default_duration_minutes,
+                    price: (s.default_price_cents / 100).toFixed(2),
+                  });
+                }}
+                className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">— escolher serviço do catálogo —</option>
+                {services.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} · {(s.default_price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                   </option>
                 ))}
               </select>
