@@ -277,6 +277,48 @@ export type Database = {
           },
         ]
       }
+      team_locations: {
+        Row: {
+          accuracy_m: number | null
+          created_at: string
+          heading: number | null
+          id: string
+          lat: number
+          lng: number
+          owner_id: string
+          recorded_at: string
+          speed: number | null
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          lat: number
+          lng: number
+          owner_id: string
+          recorded_at?: string
+          speed?: number | null
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          owner_id?: string
+          recorded_at?: string
+          speed?: number | null
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           created_at: string
