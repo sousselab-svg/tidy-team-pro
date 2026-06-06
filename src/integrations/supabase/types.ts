@@ -376,6 +376,36 @@ export type Database = {
           },
         ]
       }
+      role_permissions: {
+        Row: {
+          allowed: boolean
+          created_at: string
+          id: string
+          org_owner_id: string
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          allowed?: boolean
+          created_at?: string
+          id?: string
+          org_owner_id: string
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          allowed?: boolean
+          created_at?: string
+          id?: string
+          org_owner_id?: string
+          permission?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_catalog: {
         Row: {
           active: boolean
@@ -561,6 +591,10 @@ export type Database = {
     }
     Functions: {
       get_org_owner: { Args: { _uid: string }; Returns: string }
+      has_permission: {
+        Args: { _permission: string; _uid: string }
+        Returns: boolean
+      }
       is_org_admin: { Args: { _uid: string }; Returns: boolean }
       operator_can_access_job: {
         Args: { _team_id: string; _uid: string }
