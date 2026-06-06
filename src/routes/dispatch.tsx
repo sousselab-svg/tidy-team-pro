@@ -9,6 +9,8 @@ import {
   MessageCircle,
   Navigation,
   Phone,
+  ShieldAlert,
+  ShieldCheck,
   X,
 } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
@@ -16,6 +18,7 @@ import { DispatchMap } from "@/components/DispatchMap";
 import {
   dispatchTeams as initialTeams,
   TEAM_STATUS,
+  distanceM,
   type DispatchTeam,
   type TeamStatus,
 } from "@/lib/dispatch-data";
@@ -30,6 +33,23 @@ export const Route = createFileRoute("/dispatch")({
   }),
   component: DispatchPage,
 });
+
+type GeofenceStatus = {
+  ok: boolean;
+  distance: number;
+  radius: number;
+  hasFence: boolean;
+};
+
+function getGeofence(team: DispatchTeam): GeofenceStatus {
+  const loc = team.job?.location;
+  const radius = team.job?.geofenceM ?? 0;
+  if (!loc || !radius) {
+    return { ok: false, distance: 0, radius: 0, hasFence: false };
+  }
+  const distance = distanceM(team.position, loc);
+  return { ok: distance <= radius, distance, radius, hasFence: true };
+}
 
 const FILTERS: { id: TeamStatus | "all"; label: string }[] = [
   { id: "all", label: "Todas" },
@@ -57,9 +77,18 @@ function DispatchPage() {
   }, [teams]);
 
   const checkIn = (id: string) => {
+    const team = teams.find((t) => t.id === id);
+    if (!team || team.status !== "on_way") return;
+    const fence = getGeofence(team);
+    if (!fence.ok) {
+      toast.error("Fora do geofence", {
+        description: `Equipe está a ${fence.distance} m do local (máx. ${fence.radius} m). Aproxime-se do endereço para fazer check-in.`,
+      });
+      return;
+    }
     setTeams((prev) =>
       prev.map((t) =>
-        t.id === id && t.status === "on_way"
+        t.id === id
           ? {
               ...t,
               status: "in_progress",
@@ -69,16 +98,24 @@ function DispatchPage() {
           : t,
       ),
     );
-    const team = teams.find((t) => t.id === id);
-    toast.success(`Check-in: ${team?.name ?? "equipe"}`, {
-      description: "Serviço iniciado — status atualizado para Em andamento.",
+    toast.success(`Check-in confirmado: ${team.name}`, {
+      description: `Localização validada a ${fence.distance} m do endereço.`,
     });
   };
 
   const checkOut = (id: string) => {
+    const team = teams.find((t) => t.id === id);
+    if (!team || team.status !== "in_progress") return;
+    const fence = getGeofence(team);
+    if (!fence.ok) {
+      toast.error("Fora do geofence", {
+        description: `Não é possível finalizar: equipe está a ${fence.distance} m do local (máx. ${fence.radius} m).`,
+      });
+      return;
+    }
     setTeams((prev) =>
       prev.map((t) =>
-        t.id === id && t.status === "in_progress"
+        t.id === id
           ? {
               ...t,
               status: "completed",
@@ -88,9 +125,8 @@ function DispatchPage() {
           : t,
       ),
     );
-    const team = teams.find((t) => t.id === id);
-    toast.success(`Check-out: ${team?.name ?? "equipe"}`, {
-      description: "Serviço finalizado com sucesso.",
+    toast.success(`Check-out confirmado: ${team.name}`, {
+      description: `Serviço finalizado dentro do perímetro autorizado.`,
     });
   };
 
@@ -161,6 +197,9 @@ function DispatchPage() {
           {visibleTeams.map((team) => {
             const meta = TEAM_STATUS[team.status];
             const active = team.id === selectedId;
+            const fence = getGeofence(team);
+            const showFence =
+              fence.hasFence && (team.status === "on_way" || team.status === "in_progress");
             return (
               <li key={team.id}>
                 <button
@@ -243,6 +282,24 @@ function DispatchPage() {
                     <span className="flex items-center gap-1">
                       <Battery className="size-3" /> {team.batteryPct}%
                     </span>
+                    {showFence && (
+                      <span
+                        className="ml-auto flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        style={{
+                          backgroundColor: `color-mix(in oklab, ${
+                            fence.ok ? "var(--success)" : "var(--warning)"
+                          } 15%, transparent)`,
+                          color: fence.ok ? "var(--success)" : "var(--warning)",
+                        }}
+                      >
+                        {fence.ok ? (
+                          <ShieldCheck className="size-3" />
+                        ) : (
+                          <ShieldAlert className="size-3" />
+                        )}
+                        {fence.distance} m / {fence.radius} m
+                      </span>
+                    )}
                   </div>
 
                   {(team.status === "on_way" || team.status === "in_progress") && (
@@ -250,24 +307,34 @@ function DispatchPage() {
                       {team.status === "on_way" ? (
                         <button
                           type="button"
+                          disabled={!fence.ok}
                           onClick={(e) => {
                             e.stopPropagation();
                             checkIn(team.id);
                           }}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground"
+                          title={fence.ok ? "Fazer check-in" : `Fora do geofence (${fence.distance} m)`}
                         >
-                          <LogIn className="size-3.5" /> Fazer check-in
+                          <LogIn className="size-3.5" />
+                          {fence.ok
+                            ? "Fazer check-in"
+                            : `Aproxime-se · ${fence.distance} m`}
                         </button>
                       ) : (
                         <button
                           type="button"
+                          disabled={!fence.ok}
                           onClick={(e) => {
                             e.stopPropagation();
                             checkOut(team.id);
                           }}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-bold text-background"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-bold text-background disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground"
+                          title={fence.ok ? "Fazer check-out" : `Fora do geofence (${fence.distance} m)`}
                         >
-                          <CheckCircle2 className="size-3.5" /> Fazer check-out
+                          <CheckCircle2 className="size-3.5" />
+                          {fence.ok
+                            ? "Fazer check-out"
+                            : `Fora da área · ${fence.distance} m`}
                         </button>
                       )}
                     </div>
@@ -292,6 +359,23 @@ function DispatchPage() {
                   <p className="truncate text-[11px] opacity-70">{selected.job.client}</p>
                 )}
               </div>
+              {(() => {
+                const f = getGeofence(selected);
+                if (!f.hasFence) return null;
+                return (
+                  <span
+                    className="flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold"
+                    style={{
+                      backgroundColor: f.ok
+                        ? "color-mix(in oklab, var(--success) 25%, transparent)"
+                        : "color-mix(in oklab, var(--warning) 25%, transparent)",
+                    }}
+                  >
+                    {f.ok ? <ShieldCheck className="size-3" /> : <ShieldAlert className="size-3" />}
+                    {f.distance}m
+                  </span>
+                );
+              })()}
               <button
                 onClick={() => setSelectedId(undefined)}
                 className="grid size-7 shrink-0 place-items-center rounded-full bg-white/10"
@@ -304,14 +388,16 @@ function DispatchPage() {
               {selected.status === "on_way" ? (
                 <button
                   onClick={() => checkIn(selected.id)}
-                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                  disabled={!getGeofence(selected).ok}
+                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-background/50"
                 >
                   <LogIn className="size-3.5" /> Check-in
                 </button>
               ) : selected.status === "in_progress" ? (
                 <button
                   onClick={() => checkOut(selected.id)}
-                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                  disabled={!getGeofence(selected).ok}
+                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-background/50"
                 >
                   <CheckCircle2 className="size-3.5" /> Check-out
                 </button>
