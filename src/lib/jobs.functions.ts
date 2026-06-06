@@ -194,6 +194,13 @@ export const updateJobStatus = createServerFn({ method: "POST" })
           if (!invErr) createdInvoice = true;
         }
       }
+      // Review request SMS (idempotent)
+      try {
+        const { enqueueSmsForJob } = await import("@/lib/sms.server");
+        await enqueueSmsForJob(data.id, "review", { fireNow: true });
+      } catch (e) {
+        console.error("[sms] review enqueue failed", e);
+      }
     }
     return { ok: true, createdInvoice };
   });
