@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
-import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles, Route as RouteIcon } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles, Route as RouteIcon, Brain } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
@@ -247,6 +247,12 @@ function Dashboard() {
               <RouteIcon className="size-4" />
             </span>
             <p className="text-[11px] font-bold leading-tight">Route opt.</p>
+          </Link>
+          <Link to="/inteligencia" className="flex flex-col items-start gap-2 rounded-2xl bg-card p-3 ring-1 ring-border">
+            <span className="grid size-9 place-items-center rounded-full bg-primary/15 text-primary">
+              <Brain className="size-4" />
+            </span>
+            <p className="text-[11px] font-bold leading-tight">AI Intel</p>
           </Link>
         </div>
       </section>
