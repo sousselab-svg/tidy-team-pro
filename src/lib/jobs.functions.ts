@@ -27,6 +27,9 @@ export type JobRow = {
   geofence_radius_m: number;
   auto_check_in_enabled: boolean;
   arrived_at: string | null;
+  signature_path: string | null;
+  signed_by_name: string | null;
+  signed_at: string | null;
   created_at: string;
   updated_at: string;
   client?: { name: string } | null;
