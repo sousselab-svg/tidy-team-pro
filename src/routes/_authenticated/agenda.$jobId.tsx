@@ -41,6 +41,18 @@ const STATUS_META: Record<JobStatus, { label: string; color: string; next?: JobS
 
 const FLOW: JobStatus[] = ["scheduled", "on_way", "in_progress", "completed"];
 
+type JobPatch = {
+  client_id?: string | null;
+  title?: string;
+  address?: string | null;
+  scheduled_at?: string;
+  duration_minutes?: number;
+  price_cents?: number;
+  team_name?: string | null;
+  notes?: string | null;
+  status?: JobStatus;
+};
+
 function brl(cents: number) {
   return (cents / 100).toLocaleString("pt-BR", {
     style: "currency",
@@ -65,8 +77,7 @@ function JobDetailPage() {
   const clientsQ = useQuery({ queryKey: ["clients"], queryFn: () => listC(), enabled: editing });
 
   const updateMut = useMutation({
-    mutationFn: (patch: Parameters<typeof update>[0]["data"]["patch"]) =>
-      update({ data: { id: jobId, patch } }),
+    mutationFn: (patch: JobPatch) => update({ data: { id: jobId, patch } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["job", jobId] });
       qc.invalidateQueries({ queryKey: ["jobs"] });
