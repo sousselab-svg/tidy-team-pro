@@ -197,6 +197,9 @@ function DispatchPage() {
           {visibleTeams.map((team) => {
             const meta = TEAM_STATUS[team.status];
             const active = team.id === selectedId;
+            const fence = getGeofence(team);
+            const showFence =
+              fence.hasFence && (team.status === "on_way" || team.status === "in_progress");
             return (
               <li key={team.id}>
                 <button
@@ -279,6 +282,24 @@ function DispatchPage() {
                     <span className="flex items-center gap-1">
                       <Battery className="size-3" /> {team.batteryPct}%
                     </span>
+                    {showFence && (
+                      <span
+                        className="ml-auto flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        style={{
+                          backgroundColor: `color-mix(in oklab, ${
+                            fence.ok ? "var(--success)" : "var(--warning)"
+                          } 15%, transparent)`,
+                          color: fence.ok ? "var(--success)" : "var(--warning)",
+                        }}
+                      >
+                        {fence.ok ? (
+                          <ShieldCheck className="size-3" />
+                        ) : (
+                          <ShieldAlert className="size-3" />
+                        )}
+                        {fence.distance} m / {fence.radius} m
+                      </span>
+                    )}
                   </div>
 
                   {(team.status === "on_way" || team.status === "in_progress") && (
@@ -286,24 +307,34 @@ function DispatchPage() {
                       {team.status === "on_way" ? (
                         <button
                           type="button"
+                          disabled={!fence.ok}
                           onClick={(e) => {
                             e.stopPropagation();
                             checkIn(team.id);
                           }}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground"
+                          title={fence.ok ? "Fazer check-in" : `Fora do geofence (${fence.distance} m)`}
                         >
-                          <LogIn className="size-3.5" /> Fazer check-in
+                          <LogIn className="size-3.5" />
+                          {fence.ok
+                            ? "Fazer check-in"
+                            : `Aproxime-se · ${fence.distance} m`}
                         </button>
                       ) : (
                         <button
                           type="button"
+                          disabled={!fence.ok}
                           onClick={(e) => {
                             e.stopPropagation();
                             checkOut(team.id);
                           }}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-bold text-background"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-foreground py-2 text-xs font-bold text-background disabled:cursor-not-allowed disabled:bg-secondary disabled:text-muted-foreground"
+                          title={fence.ok ? "Fazer check-out" : `Fora do geofence (${fence.distance} m)`}
                         >
-                          <CheckCircle2 className="size-3.5" /> Fazer check-out
+                          <CheckCircle2 className="size-3.5" />
+                          {fence.ok
+                            ? "Fazer check-out"
+                            : `Fora da área · ${fence.distance} m`}
                         </button>
                       )}
                     </div>
