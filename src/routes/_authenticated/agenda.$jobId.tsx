@@ -33,6 +33,7 @@ import { TeamLiveMap } from "@/components/TeamLiveMap";
 import { geocodeJob } from "@/lib/geofence.functions";
 import { Radar } from "lucide-react";
 import { JobPhotos } from "@/components/JobPhotos";
+import { SignaturePad } from "@/components/SignaturePad";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -228,6 +229,13 @@ function JobDetailPage() {
           <ChecklistSection jobId={job.id} initial={job.checklist ?? []} />
 
           <JobPhotos jobId={job.id} />
+
+          <SignaturePad
+            jobId={job.id}
+            signedAt={job.signed_at}
+            signedByName={job.signed_by_name}
+            hasSignature={Boolean(job.signature_path)}
+          />
 
           <section className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-border">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Equipe responsável</p>
