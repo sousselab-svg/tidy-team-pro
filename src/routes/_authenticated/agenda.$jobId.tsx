@@ -34,6 +34,7 @@ import { geocodeJob } from "@/lib/geofence.functions";
 import { Radar } from "lucide-react";
 import { JobPhotos } from "@/components/JobPhotos";
 import { SignaturePad } from "@/components/SignaturePad";
+import { JobNps } from "@/components/JobNps";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -236,6 +237,8 @@ function JobDetailPage() {
             signedByName={job.signed_by_name}
             hasSignature={Boolean(job.signature_path)}
           />
+
+          <JobNps jobId={job.id} jobCompleted={job.status === "completed"} />
 
           <section className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-border">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Equipe responsável</p>
