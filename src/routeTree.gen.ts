@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OrcamentosRouteImport } from './routes/orcamentos'
 import { Route as FaturamentoRouteImport } from './routes/faturamento'
+import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const OrcamentosRoute = OrcamentosRouteImport.update({
 const FaturamentoRoute = FaturamentoRouteImport.update({
   id: '/faturamento',
   path: '/faturamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DispatchRoute = DispatchRouteImport.update({
+  id: '/dispatch',
+  path: '/dispatch',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientesRoute = ClientesRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/clientes': typeof ClientesRoute
+  '/dispatch': typeof DispatchRoute
   '/faturamento': typeof FaturamentoRoute
   '/orcamentos': typeof OrcamentosRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/clientes': typeof ClientesRoute
+  '/dispatch': typeof DispatchRoute
   '/faturamento': typeof FaturamentoRoute
   '/orcamentos': typeof OrcamentosRoute
 }
@@ -60,19 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/clientes': typeof ClientesRoute
+  '/dispatch': typeof DispatchRoute
   '/faturamento': typeof FaturamentoRoute
   '/orcamentos': typeof OrcamentosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agenda' | '/clientes' | '/faturamento' | '/orcamentos'
+  fullPaths:
+    | '/'
+    | '/agenda'
+    | '/clientes'
+    | '/dispatch'
+    | '/faturamento'
+    | '/orcamentos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agenda' | '/clientes' | '/faturamento' | '/orcamentos'
+  to:
+    | '/'
+    | '/agenda'
+    | '/clientes'
+    | '/dispatch'
+    | '/faturamento'
+    | '/orcamentos'
   id:
     | '__root__'
     | '/'
     | '/agenda'
     | '/clientes'
+    | '/dispatch'
     | '/faturamento'
     | '/orcamentos'
   fileRoutesById: FileRoutesById
@@ -81,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
   ClientesRoute: typeof ClientesRoute
+  DispatchRoute: typeof DispatchRoute
   FaturamentoRoute: typeof FaturamentoRoute
   OrcamentosRoute: typeof OrcamentosRoute
 }
@@ -99,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/faturamento'
       fullPath: '/faturamento'
       preLoaderRoute: typeof FaturamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dispatch': {
+      id: '/dispatch'
+      path: '/dispatch'
+      fullPath: '/dispatch'
+      preLoaderRoute: typeof DispatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes': {
@@ -129,9 +159,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
   ClientesRoute: ClientesRoute,
+  DispatchRoute: DispatchRoute,
   FaturamentoRoute: FaturamentoRoute,
   OrcamentosRoute: OrcamentosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
