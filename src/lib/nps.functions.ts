@@ -87,28 +87,35 @@ export const getNpsForJob = createServerFn({ method: "GET" })
 export const listNps = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<NpsSurveyWithJob[]> => {
-    const { data, error } = await context.supabase
+    const { data: rows, error } = await context.supabase
       .from("nps_surveys")
-      .select("*, jobs(title), clients(name)")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    type Row = NpsSurvey & {
-      jobs: { title: string } | null;
-      clients: { name: string } | null;
-    };
-    return ((data ?? []) as Row[]).map((r) => ({
-      id: r.id,
-      job_id: r.job_id,
-      client_id: r.client_id,
-      token: r.token,
-      score: r.score,
-      comment: r.comment,
-      sent_at: r.sent_at,
-      submitted_at: r.submitted_at,
-      created_at: r.created_at,
-      job_title: r.jobs?.title ?? null,
-      client_name: r.clients?.name ?? null,
+    const surveys = (rows ?? []) as NpsSurvey[];
+    const jobIds = Array.from(new Set(surveys.map((s) => s.job_id)));
+    const clientIds = Array.from(
+      new Set(surveys.map((s) => s.client_id).filter((v): v is string => !!v)),
+    );
+    const [jobsRes, clientsRes] = await Promise.all([
+      jobIds.length
+        ? context.supabase.from("jobs").select("id, title").in("id", jobIds)
+        : Promise.resolve({ data: [], error: null }),
+      clientIds.length
+        ? context.supabase.from("clients").select("id, name").in("id", clientIds)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+    const jobMap = new Map<string, string>(
+      ((jobsRes.data ?? []) as { id: string; title: string }[]).map((j) => [j.id, j.title]),
+    );
+    const clientMap = new Map<string, string>(
+      ((clientsRes.data ?? []) as { id: string; name: string }[]).map((c) => [c.id, c.name]),
+    );
+    return surveys.map((r) => ({
+      ...r,
+      job_title: jobMap.get(r.job_id) ?? null,
+      client_name: r.client_id ? (clientMap.get(r.client_id) ?? null) : null,
     }));
   });
 
