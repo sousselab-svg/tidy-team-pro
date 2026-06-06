@@ -9,6 +9,7 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getSettings, saveSettings } from "@/lib/settings.functions";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({ meta: [{ title: "Settings — CleanOps" }] }),
@@ -28,6 +29,11 @@ function SettingsPage() {
     company_name: "",
     pix_key: "",
     pix_instructions: "",
+    twilio_from_number: "",
+    sms_confirmation_enabled: true,
+    sms_reminder_24h_enabled: true,
+    sms_reminder_2h_enabled: true,
+    sms_review_request_enabled: true,
   });
 
   useEffect(() => {
@@ -36,6 +42,11 @@ function SettingsPage() {
         company_name: data.company_name ?? "",
         pix_key: data.pix_key ?? "",
         pix_instructions: data.pix_instructions ?? "",
+        twilio_from_number: data.twilio_from_number ?? "",
+        sms_confirmation_enabled: data.sms_confirmation_enabled ?? true,
+        sms_reminder_24h_enabled: data.sms_reminder_24h_enabled ?? true,
+        sms_reminder_2h_enabled: data.sms_reminder_2h_enabled ?? true,
+        sms_review_request_enabled: data.sms_review_request_enabled ?? true,
       });
     }
   }, [data]);
@@ -47,6 +58,11 @@ function SettingsPage() {
           company_name: form.company_name.trim() || null,
           pix_key: form.pix_key.trim() || null,
           pix_instructions: form.pix_instructions.trim() || null,
+          twilio_from_number: form.twilio_from_number.trim() || null,
+          sms_confirmation_enabled: form.sms_confirmation_enabled,
+          sms_reminder_24h_enabled: form.sms_reminder_24h_enabled,
+          sms_reminder_2h_enabled: form.sms_reminder_2h_enabled,
+          sms_review_request_enabled: form.sms_review_request_enabled,
         },
       }),
     onSuccess: () => {
@@ -83,6 +99,46 @@ function SettingsPage() {
             className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
+
+        <div className="rounded-2xl bg-card p-4 ring-1 ring-border space-y-3">
+          <div>
+            <h3 className="text-sm font-bold">{t("settings.sms.title")}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">{t("settings.sms.subtitle")}</p>
+          </div>
+          <Field
+            label={t("settings.sms.fromNumber")}
+            value={form.twilio_from_number}
+            onChange={(v) => setForm({ ...form, twilio_from_number: v })}
+            placeholder={t("settings.sms.fromPlaceholder")}
+          />
+          <p className="-mt-2 text-[11px] text-muted-foreground">{t("settings.sms.fromHint")}</p>
+
+          <SmsToggle
+            label={t("settings.sms.confirmation")}
+            hint={t("settings.sms.confirmationHint")}
+            checked={form.sms_confirmation_enabled}
+            onChange={(v) => setForm({ ...form, sms_confirmation_enabled: v })}
+          />
+          <SmsToggle
+            label={t("settings.sms.reminder24h")}
+            hint={t("settings.sms.reminder24hHint")}
+            checked={form.sms_reminder_24h_enabled}
+            onChange={(v) => setForm({ ...form, sms_reminder_24h_enabled: v })}
+          />
+          <SmsToggle
+            label={t("settings.sms.reminder2h")}
+            hint={t("settings.sms.reminder2hHint")}
+            checked={form.sms_reminder_2h_enabled}
+            onChange={(v) => setForm({ ...form, sms_reminder_2h_enabled: v })}
+          />
+          <SmsToggle
+            label={t("settings.sms.reviewRequest")}
+            hint={t("settings.sms.reviewRequestHint")}
+            checked={form.sms_review_request_enabled}
+            onChange={(v) => setForm({ ...form, sms_review_request_enabled: v })}
+          />
+        </div>
+
         <button
           type="submit"
           disabled={mut.isPending}
