@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
+import { Route as NpsTokenRouteImport } from './routes/nps.$token'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
@@ -48,6 +49,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const PortalTokenRoute = PortalTokenRouteImport.update({
   id: '/portal/$token',
   path: '/portal/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NpsTokenRoute = NpsTokenRouteImport.update({
+  id: '/nps/$token',
+  path: '/nps/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedServicosRoute = AuthenticatedServicosRouteImport.update({
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
+  '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
+  '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/': typeof AuthenticatedIndexRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
+  '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/relatorios'
     | '/servicos'
+    | '/nps/$token'
     | '/portal/$token'
     | '/agenda/$jobId'
     | '/equipe/rastrear'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/relatorios'
     | '/servicos'
+    | '/nps/$token'
     | '/portal/$token'
     | '/'
     | '/agenda/$jobId'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orcamentos'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
+    | '/nps/$token'
     | '/portal/$token'
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DispatchRoute: typeof DispatchRoute
+  NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
 }
 
@@ -260,6 +273,13 @@ declare module '@tanstack/react-router' {
       path: '/portal/$token'
       fullPath: '/portal/$token'
       preLoaderRoute: typeof PortalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nps/$token': {
+      id: '/nps/$token'
+      path: '/nps/$token'
+      fullPath: '/nps/$token'
+      preLoaderRoute: typeof NpsTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/servicos': {
@@ -397,8 +417,19 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DispatchRoute: DispatchRoute,
+  NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
