@@ -322,9 +322,6 @@ export function DispatchMap({
     map.panTo(center);
   }, [selected, ready]);
 
-  // Avoid unused-var warning for shared constant
-  void MAP_METERS_PER_PERCENT;
-
   return (
     <div className="relative h-72 w-full overflow-hidden rounded-3xl bg-[color:var(--accent)] ring-1 ring-border">
       <div ref={containerRef} className="absolute inset-0 h-full w-full" />
