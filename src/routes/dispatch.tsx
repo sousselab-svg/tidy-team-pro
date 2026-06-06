@@ -34,6 +34,23 @@ export const Route = createFileRoute("/dispatch")({
   component: DispatchPage,
 });
 
+type GeofenceStatus = {
+  ok: boolean;
+  distance: number;
+  radius: number;
+  hasFence: boolean;
+};
+
+function getGeofence(team: DispatchTeam): GeofenceStatus {
+  const loc = team.job?.location;
+  const radius = team.job?.geofenceM ?? 0;
+  if (!loc || !radius) {
+    return { ok: false, distance: 0, radius: 0, hasFence: false };
+  }
+  const distance = distanceM(team.position, loc);
+  return { ok: distance <= radius, distance, radius, hasFence: true };
+}
+
 const FILTERS: { id: TeamStatus | "all"; label: string }[] = [
   { id: "all", label: "Todas" },
   { id: "on_way", label: "A caminho" },
