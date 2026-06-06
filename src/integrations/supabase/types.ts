@@ -25,6 +25,7 @@ export type Database = {
           notes: string | null
           owner_id: string
           phone: string | null
+          portal_token: string
           updated_at: string
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           notes?: string | null
           owner_id: string
           phone?: string | null
+          portal_token?: string
           updated_at?: string
         }
         Update: {
@@ -49,9 +51,116 @@ export type Database = {
           notes?: string | null
           owner_id?: string
           phone?: string | null
+          portal_token?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      company_settings: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          logo_url: string | null
+          owner_id: string
+          pix_instructions: string | null
+          pix_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          logo_url?: string | null
+          owner_id: string
+          pix_instructions?: string | null
+          pix_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          logo_url?: string | null
+          owner_id?: string
+          pix_instructions?: string | null
+          pix_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount_cents: number
+          client_id: string
+          confirmed_at: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          job_id: string | null
+          notes: string | null
+          owner_id: string
+          paid_at: string | null
+          payment_proof_path: string | null
+          quote_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number
+          client_id: string
+          confirmed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          owner_id: string
+          paid_at?: string | null
+          payment_proof_path?: string | null
+          quote_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          client_id?: string
+          confirmed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          owner_id?: string
+          paid_at?: string | null
+          payment_proof_path?: string | null
+          quote_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       jobs: {
         Row: {
@@ -102,6 +211,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "jobs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          approved_at: string | null
+          client_id: string
+          created_at: string
+          id: string
+          items: Json
+          notes: string | null
+          owner_id: string
+          status: string
+          title: string
+          total_cents: number
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          owner_id: string
+          status?: string
+          title: string
+          total_cents?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          owner_id?: string
+          status?: string
+          title?: string
+          total_cents?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"

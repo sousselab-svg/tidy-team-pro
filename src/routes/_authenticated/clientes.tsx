@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Phone, Plus, Search, Trash2, X } from "lucide-react";
+import { Copy, Phone, Plus, Search, Trash2, X } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import {
   createClient as createClientFn,
@@ -161,6 +161,11 @@ function ClientsPage() {
 }
 
 function ClientCard({ client, onDelete }: { client: ClientRow; onDelete: () => void }) {
+  function copyPortal() {
+    const url = `${window.location.origin}/portal/${client.portal_token}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link do portal copiado");
+  }
   return (
     <li className="rounded-2xl bg-card p-4 ring-1 ring-border">
       <div className="flex items-start gap-3">
@@ -188,13 +193,22 @@ function ClientCard({ client, onDelete }: { client: ClientRow; onDelete: () => v
             </p>
           )}
         </div>
-        <button
-          onClick={onDelete}
-          className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-          aria-label="Excluir"
-        >
-          <Trash2 className="size-4" />
-        </button>
+        <div className="flex flex-col items-center gap-1">
+          <button
+            onClick={copyPortal}
+            className="grid size-8 place-items-center rounded-full bg-secondary text-muted-foreground"
+            aria-label="Copiar link do portal"
+          >
+            <Copy className="size-3.5" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Excluir"
+          >
+            <Trash2 className="size-3.5" />
+          </button>
+        </div>
       </div>
     </li>
   );

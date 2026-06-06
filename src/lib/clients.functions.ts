@@ -12,6 +12,7 @@ export type ClientRow = {
   address: string | null;
   category: ClientCategory;
   notes: string | null;
+  portal_token: string;
   created_at: string;
   updated_at: string;
 };
