@@ -359,6 +359,23 @@ function DispatchPage() {
                   <p className="truncate text-[11px] opacity-70">{selected.job.client}</p>
                 )}
               </div>
+              {(() => {
+                const f = getGeofence(selected);
+                if (!f.hasFence) return null;
+                return (
+                  <span
+                    className="flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold"
+                    style={{
+                      backgroundColor: f.ok
+                        ? "color-mix(in oklab, var(--success) 25%, transparent)"
+                        : "color-mix(in oklab, var(--warning) 25%, transparent)",
+                    }}
+                  >
+                    {f.ok ? <ShieldCheck className="size-3" /> : <ShieldAlert className="size-3" />}
+                    {f.distance}m
+                  </span>
+                );
+              })()}
               <button
                 onClick={() => setSelectedId(undefined)}
                 className="grid size-7 shrink-0 place-items-center rounded-full bg-white/10"
@@ -371,14 +388,16 @@ function DispatchPage() {
               {selected.status === "on_way" ? (
                 <button
                   onClick={() => checkIn(selected.id)}
-                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                  disabled={!getGeofence(selected).ok}
+                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-background/50"
                 >
                   <LogIn className="size-3.5" /> Check-in
                 </button>
               ) : selected.status === "in_progress" ? (
                 <button
                   onClick={() => checkOut(selected.id)}
-                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                  disabled={!getGeofence(selected).ok}
+                  className="col-span-1 flex items-center justify-center gap-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-background/50"
                 >
                   <CheckCircle2 className="size-3.5" /> Check-out
                 </button>
