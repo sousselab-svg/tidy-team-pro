@@ -19,11 +19,16 @@ export type JobRow = {
   price_cents: number;
   status: JobStatus;
   team_name: string | null;
+  team_id: string | null;
+  checklist: ChecklistItem[];
   notes: string | null;
   created_at: string;
   updated_at: string;
   client?: { name: string } | null;
+  team?: { id: string; name: string; color: string | null } | null;
 };
+
+export type ChecklistItem = { id: string; label: string; done: boolean };
 
 const JobInput = z.object({
   client_id: z.string().uuid().nullable().optional(),
@@ -33,6 +38,7 @@ const JobInput = z.object({
   duration_minutes: z.number().int().min(15).max(8 * 60).default(90),
   price_cents: z.number().int().min(0).default(0),
   team_name: z.string().max(100).nullable().optional(),
+  team_id: z.string().uuid().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
 
@@ -46,6 +52,7 @@ const JobUpdateInput = z.object({
     duration_minutes: z.number().int().min(15).max(8 * 60).optional(),
     price_cents: z.number().int().min(0).optional(),
     team_name: z.string().max(100).nullable().optional(),
+    team_id: z.string().uuid().nullable().optional(),
     notes: z.string().max(2000).nullable().optional(),
     status: z
       .enum(["scheduled", "on_way", "in_progress", "completed", "cancelled"])
@@ -53,15 +60,23 @@ const JobUpdateInput = z.object({
   }),
 });
 
+const ChecklistSchema = z.array(
+  z.object({
+    id: z.string().min(1).max(40),
+    label: z.string().min(1).max(200),
+    done: z.boolean(),
+  }),
+).max(100);
+
 export const listJobs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<JobRow[]> => {
     const { data, error } = await context.supabase
       .from("jobs")
-      .select("*, client:clients(name)")
+      .select("*, client:clients(name), team:teams(id, name, color)")
       .order("scheduled_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []) as JobRow[];
+    return (data ?? []) as unknown as JobRow[];
   });
 
 export const getJob = createServerFn({ method: "GET" })
@@ -70,11 +85,11 @@ export const getJob = createServerFn({ method: "GET" })
   .handler(async ({ context, data }): Promise<JobRow | null> => {
     const { data: row, error } = await context.supabase
       .from("jobs")
-      .select("*, client:clients(name)")
+      .select("*, client:clients(name), team:teams(id, name, color)")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return (row as JobRow | null) ?? null;
+    return (row as unknown as JobRow | null) ?? null;
   });
 
 export const updateJob = createServerFn({ method: "POST" })
@@ -85,10 +100,10 @@ export const updateJob = createServerFn({ method: "POST" })
       .from("jobs")
       .update(data.patch)
       .eq("id", data.id)
-      .select("*, client:clients(name)")
+      .select("*, client:clients(name), team:teams(id, name, color)")
       .single();
     if (error) throw new Error(error.message);
-    return row as JobRow;
+    return row as unknown as JobRow;
   });
 
 export const createJob = createServerFn({ method: "POST" })
@@ -98,10 +113,24 @@ export const createJob = createServerFn({ method: "POST" })
     const { data: row, error } = await context.supabase
       .from("jobs")
       .insert({ ...data, owner_id: context.userId })
-      .select("*, client:clients(name)")
+      .select("*, client:clients(name), team:teams(id, name, color)")
       .single();
     if (error) throw new Error(error.message);
-    return row as JobRow;
+    return row as unknown as JobRow;
+  });
+
+export const updateJobChecklist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ id: z.string().uuid(), checklist: ChecklistSchema }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("jobs")
+      .update({ checklist: data.checklist })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const updateJobStatus = createServerFn({ method: "POST" })

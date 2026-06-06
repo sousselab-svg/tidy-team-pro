@@ -165,6 +165,7 @@ export type Database = {
       jobs: {
         Row: {
           address: string | null
+          checklist: Json
           client_id: string | null
           created_at: string
           duration_minutes: number
@@ -174,12 +175,14 @@ export type Database = {
           price_cents: number
           scheduled_at: string
           status: string
+          team_id: string | null
           team_name: string | null
           title: string
           updated_at: string
         }
         Insert: {
           address?: string | null
+          checklist?: Json
           client_id?: string | null
           created_at?: string
           duration_minutes?: number
@@ -189,12 +192,14 @@ export type Database = {
           price_cents?: number
           scheduled_at: string
           status?: string
+          team_id?: string | null
           team_name?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           address?: string | null
+          checklist?: Json
           client_id?: string | null
           created_at?: string
           duration_minutes?: number
@@ -204,6 +209,7 @@ export type Database = {
           price_cents?: number
           scheduled_at?: string
           status?: string
+          team_id?: string | null
           team_name?: string | null
           title?: string
           updated_at?: string
@@ -270,6 +276,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          phone: string | null
+          role: string | null
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          phone?: string | null
+          role?: string | null
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          role?: string | null
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
