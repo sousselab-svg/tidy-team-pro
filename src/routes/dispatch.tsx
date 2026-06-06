@@ -99,7 +99,7 @@ function DispatchPage() {
       <PageHeader
         eyebrow="Dispatch"
         title="Equipes em campo"
-        subtitle={`${dispatchTeams.length} equipes · rastreamento ao vivo`}
+        subtitle={`${teams.length} equipes · rastreamento ao vivo`}
       />
 
       <section className="px-5">
