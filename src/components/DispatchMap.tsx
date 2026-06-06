@@ -340,7 +340,7 @@ export function DispatchMap({
           <span className="absolute inset-0 animate-ping rounded-full bg-[color:var(--success)] opacity-75" />
           <span className="relative size-2 rounded-full bg-[color:var(--success)]" />
         </span>
-        Ao vivo · Google Maps
+        GPS ao vivo · Google Routes
       </div>
     </div>
   );
