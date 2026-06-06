@@ -69,10 +69,7 @@ type JobPatch = {
 };
 
 function brl(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
+  return formatCurrency(cents);
 }
 
 function JobDetailPage() {
@@ -198,11 +195,7 @@ function JobDetailPage() {
             <Row
               icon={<Calendar className="size-4" />}
               label="Quando"
-              value={`${dt.toLocaleDateString("pt-BR", {
-                weekday: "long",
-                day: "2-digit",
-                month: "long",
-              })} · ${dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
+              value={formatDateTime(dt)}
             />
             <Row
               icon={<MapPin className="size-4" />}
@@ -327,10 +320,7 @@ function JobDetailPage() {
             {job.arrived_at && (
               <p className="mt-3 text-[11px] text-[color:var(--success)]">
                 ✓ Chegada registrada às{" "}
-                {new Date(job.arrived_at).toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatTime(job.arrived_at)}
               </p>
             )}
           </section>

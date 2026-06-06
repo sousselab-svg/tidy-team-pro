@@ -30,7 +30,7 @@ const STATUS_COLORS = ["#3b82f6", "#06b6d4", "#f59e0b", "#10b981", "#ef4444", "#
 
 function fmtMonth(k: string) {
   const [y, m] = k.split("-");
-  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("pt-BR", { month: "short" });
+  return formatMonthShort(new Date(Number(y), Number(m) - 1, 1));
 }
 
 function downloadCsv(filename: string, rows: (string | number)[][]) {

@@ -86,13 +86,7 @@ export function SignaturePad({
             {signedAt && (
               <span className="text-muted-foreground">
                 {" · "}
-                {new Date(signedAt).toLocaleString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {formatDateTime(signedAt)}
               </span>
             )}
           </p>
