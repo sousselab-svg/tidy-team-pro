@@ -281,6 +281,48 @@ export type Database = {
           },
         ]
       }
+      nps_surveys: {
+        Row: {
+          client_id: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          job_id: string
+          owner_id: string
+          score: number | null
+          sent_at: string | null
+          submitted_at: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          owner_id: string
+          score?: number | null
+          sent_at?: string | null
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          owner_id?: string
+          score?: number | null
+          sent_at?: string | null
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           approved_at: string | null
