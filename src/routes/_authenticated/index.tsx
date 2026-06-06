@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
-import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles, Route as RouteIcon } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
