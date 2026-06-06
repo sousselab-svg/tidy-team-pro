@@ -6,12 +6,14 @@ import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, Shield
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
+import { useTranslation } from "react-i18next";
+import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
-      { title: "Painel — CleanOps" },
-      { name: "description", content: "Resumo operacional do dia." },
+      { title: "Dashboard — CleanOps" },
+      { name: "description", content: "Daily operations overview." },
     ],
   }),
   component: Dashboard,
@@ -19,18 +21,15 @@ export const Route = createFileRoute("/_authenticated/")({
 
 const statsQuery = queryOptions({ queryKey: ["dashboard-stats"], queryFn: () => getDashboardStats() });
 
-const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
-
-const STATUS_LABEL: Record<string, { label: string; tint: string }> = {
-  scheduled: { label: "Agendado", tint: "var(--muted-foreground)" },
-  on_way: { label: "A caminho", tint: "var(--warning)" },
-  in_progress: { label: "Em andamento", tint: "var(--info)" },
-  completed: { label: "Concluído", tint: "var(--success)" },
-  cancelled: { label: "Cancelado", tint: "var(--destructive)" },
-};
-
 function Dashboard() {
+  const { t } = useTranslation();
+  const STATUS_TINT: Record<string, string> = {
+    scheduled: "var(--muted-foreground)",
+    on_way: "var(--warning)",
+    in_progress: "var(--info)",
+    completed: "var(--success)",
+    cancelled: "var(--destructive)",
+  };
   const fn = useServerFn(getDashboardStats);
   const meFn = useServerFn(getMyContext);
   const navigate = useNavigate();
@@ -50,7 +49,7 @@ function Dashboard() {
   if (isOperator) {
     return (
       <MobileShell>
-        <div className="p-8 text-center text-sm text-muted-foreground">Redirecionando…</div>
+        <div className="p-8 text-center text-sm text-muted-foreground">{t("dashboard.redirecting")}</div>
       </MobileShell>
     );
   }
@@ -61,14 +60,14 @@ function Dashboard() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="CleanOps"
-        title="Painel"
-        subtitle="Resumo da operação"
+        eyebrow={t("brand")}
+        title={t("dashboard.title")}
+        subtitle={t("dashboard.subtitle")}
         right={
           <Link
             to="/lembretes"
             className="relative grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
-            aria-label="Lembretes"
+            aria-label={t("nav.reminders")}
           >
             <Bell className="size-5" />
             {(data?.pendingProofsCount ?? 0) > 0 && (
@@ -83,26 +82,26 @@ function Dashboard() {
       <section className="px-5">
         <div className="rounded-3xl bg-foreground p-5 text-background shadow-lg">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium uppercase tracking-widest opacity-70">Recebido no mês</p>
+            <p className="text-xs font-medium uppercase tracking-widest opacity-70">{t("dashboard.monthRevenue")}</p>
             <span className="flex items-center gap-1 text-xs font-semibold text-[color:var(--success)]">
-              <ArrowUpRight className="size-3" /> {brl(data?.todayRevenueCents ?? 0)} hoje
+              <ArrowUpRight className="size-3" /> {formatCurrency(data?.todayRevenueCents ?? 0)} {t("dashboard.todaySuffix")}
             </span>
           </div>
           <p className="mt-2 text-4xl font-bold tracking-tight">
-            {isLoading ? "…" : brl(data?.monthRevenueCents ?? 0)}
+            {isLoading ? "…" : formatCurrency(data?.monthRevenueCents ?? 0)}
           </p>
           <div className="mt-5 grid grid-cols-3 gap-3 text-center">
             <div>
               <p className="text-lg font-bold">{data?.todayJobsTotal ?? 0}</p>
-              <p className="text-[10px] uppercase tracking-wider opacity-60">Hoje</p>
+              <p className="text-[10px] uppercase tracking-wider opacity-60">{t("dashboard.today")}</p>
             </div>
             <div className="border-x border-white/10">
               <p className="text-lg font-bold">{data?.todayJobsActive ?? 0}</p>
-              <p className="text-[10px] uppercase tracking-wider opacity-60">Em campo</p>
+              <p className="text-[10px] uppercase tracking-wider opacity-60">{t("dashboard.inField")}</p>
             </div>
             <div>
               <p className="text-lg font-bold">{data?.todayJobsCompleted ?? 0}</p>
-              <p className="text-[10px] uppercase tracking-wider opacity-60">Concluídos</p>
+              <p className="text-[10px] uppercase tracking-wider opacity-60">{t("dashboard.completed")}</p>
             </div>
           </div>
         </div>
@@ -114,22 +113,22 @@ function Dashboard() {
             to="/faturamento"
             Icon={Wallet}
             tint="var(--info)"
-            value={brl(data?.openInvoicesSumCents ?? 0)}
-            label={`${data?.openInvoicesCount ?? 0} em aberto`}
+            value={formatCurrency(data?.openInvoicesSumCents ?? 0)}
+            label={t("dashboard.openInvoices", { count: data?.openInvoicesCount ?? 0 })}
           />
           <KpiCard
             to="/orcamentos"
             Icon={FileText}
             tint="var(--warning)"
             value={String(data?.pendingQuotesCount ?? 0)}
-            label="Orçamentos p/ aprovar"
+            label={t("dashboard.quotesToApprove")}
           />
           <KpiCard
             to="/agenda"
             Icon={Calendar}
             tint="var(--primary)"
             value={String(data?.todayJobsTotal ?? 0)}
-            label="Serviços hoje"
+            label={t("dashboard.todayJobs")}
           />
         </div>
       </section>
@@ -141,9 +140,9 @@ function Dashboard() {
             className="block rounded-2xl bg-[color:var(--warning)]/10 p-4 ring-1 ring-[color:var(--warning)]/30"
           >
             <p className="text-xs font-bold uppercase tracking-wider text-[color:var(--warning)]">
-              {data!.pendingProofsCount} comprovante(s) aguardando confirmação
+              {t("dashboard.proofsPending", { count: data!.pendingProofsCount })}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">Toque para revisar</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("dashboard.tapToReview")}</p>
           </Link>
         </section>
       )}
@@ -158,8 +157,8 @@ function Dashboard() {
               <BarChart3 className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-bold">Relatórios & BI</p>
-              <p className="text-[11px] text-muted-foreground">Receita, status e top clientes</p>
+              <p className="text-sm font-bold">{t("dashboard.reportsTitle")}</p>
+              <p className="text-[11px] text-muted-foreground">{t("dashboard.reportsSubtitle")}</p>
             </div>
           </div>
           <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -176,8 +175,8 @@ function Dashboard() {
               <Briefcase className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-bold">Catálogo de serviços</p>
-              <p className="text-[11px] text-muted-foreground">Modelos com preço e duração padrão</p>
+              <p className="text-sm font-bold">{t("dashboard.catalogTitle")}</p>
+              <p className="text-[11px] text-muted-foreground">{t("dashboard.catalogSubtitle")}</p>
             </div>
           </div>
           <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -194,8 +193,8 @@ function Dashboard() {
               <Star className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-bold">Avaliações NPS</p>
-              <p className="text-[11px] text-muted-foreground">Satisfação dos clientes pós-serviço</p>
+              <p className="text-sm font-bold">{t("dashboard.npsTitle")}</p>
+              <p className="text-[11px] text-muted-foreground">{t("dashboard.npsSubtitle")}</p>
             </div>
           </div>
           <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -212,8 +211,8 @@ function Dashboard() {
               <ShieldCheck className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-bold">Permissões da equipe</p>
-              <p className="text-[11px] text-muted-foreground">O que cada papel pode executar</p>
+              <p className="text-sm font-bold">{t("dashboard.permsTitle")}</p>
+              <p className="text-[11px] text-muted-foreground">{t("dashboard.permsSubtitle")}</p>
             </div>
           </div>
           <ArrowUpRight className="size-4 text-muted-foreground" />
@@ -222,23 +221,23 @@ function Dashboard() {
 
       <section className="px-5 pt-7">
         <div className="mb-3 flex items-end justify-between">
-          <h2 className="text-sm font-bold text-foreground">Serviços de hoje</h2>
-          <Link to="/agenda" className="text-xs font-semibold text-primary">Ver agenda</Link>
+          <h2 className="text-sm font-bold text-foreground">{t("dashboard.todayHeader")}</h2>
+          <Link to="/agenda" className="text-xs font-semibold text-primary">{t("dashboard.viewSchedule")}</Link>
         </div>
         {todayJobs.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-border p-6 text-center">
-            <p className="text-sm font-semibold">Nada agendado hoje</p>
+            <p className="text-sm font-semibold">{t("dashboard.nothingScheduled")}</p>
             <Link
               to="/agenda"
               className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
             >
-              <Plus className="size-3" /> Agendar serviço
+              <Plus className="size-3" /> {t("dashboard.scheduleJob")}
             </Link>
           </div>
         ) : (
           <ul className="space-y-3">
             {todayJobs.map((job) => (
-              <JobLi key={job.id} job={job} />
+              <JobLi key={job.id} job={job} statusTint={STATUS_TINT} />
             ))}
           </ul>
         )}
@@ -247,11 +246,11 @@ function Dashboard() {
       {upcoming.length > 0 && (
         <section className="px-5 pt-7">
           <div className="mb-3 flex items-end justify-between">
-            <h2 className="text-sm font-bold text-foreground">Próximos serviços</h2>
+            <h2 className="text-sm font-bold text-foreground">{t("dashboard.upcoming")}</h2>
           </div>
           <ul className="space-y-3">
             {upcoming.map((job) => (
-              <JobLi key={job.id} job={job} showDate />
+              <JobLi key={job.id} job={job} showDate statusTint={STATUS_TINT} />
             ))}
           </ul>
         </section>
@@ -287,12 +286,12 @@ function KpiCard({
   );
 }
 
-function JobLi({ job, showDate = false }: { job: { id: string; title: string; scheduled_at: string; status: string; address: string | null; price_cents: number; client_name: string | null }; showDate?: boolean }) {
+function JobLi({ job, showDate = false, statusTint }: { job: { id: string; title: string; scheduled_at: string; status: string; address: string | null; price_cents: number; client_name: string | null }; showDate?: boolean; statusTint: Record<string, string> }) {
+  const { t } = useTranslation();
   const dt = new Date(job.scheduled_at);
-  const meta = STATUS_LABEL[job.status] ?? STATUS_LABEL.scheduled;
-  const when = showDate
-    ? dt.toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
-    : dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const tint = statusTint[job.status] ?? statusTint.scheduled;
+  const label = t(`status.${job.status}` as const, { defaultValue: job.status });
+  const when = showDate ? formatDateTime(dt) : formatTime(dt);
   return (
     <li>
       <Link
@@ -311,11 +310,11 @@ function JobLi({ job, showDate = false }: { job: { id: string; title: string; sc
           <span
             className="shrink-0 rounded-full px-2 py-1 text-[10px] font-bold uppercase"
             style={{
-              backgroundColor: `color-mix(in oklab, ${meta.tint} 15%, transparent)`,
-              color: meta.tint,
+              backgroundColor: `color-mix(in oklab, ${tint} 15%, transparent)`,
+              color: tint,
             }}
           >
-            {meta.label}
+            {label}
           </span>
         </div>
         <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
@@ -323,7 +322,7 @@ function JobLi({ job, showDate = false }: { job: { id: string; title: string; sc
             <MapPin className="size-3.5 shrink-0" />
             <span className="truncate">{job.address || "—"}</span>
           </span>
-          <span className="font-semibold text-foreground">{brl(job.price_cents)}</span>
+          <span className="font-semibold text-foreground">{formatCurrency(job.price_cents)}</span>
         </div>
       </Link>
     </li>

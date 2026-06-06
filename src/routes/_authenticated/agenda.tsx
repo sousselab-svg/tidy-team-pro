@@ -13,34 +13,29 @@ import {
 } from "@/lib/jobs.functions";
 import { listServices, type ServiceItem } from "@/lib/services.functions";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { formatCurrency, formatLongDate, formatTime, formatWeekdayShort } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/agenda")({
   head: () => ({
     meta: [
-      { title: "Agenda — CleanOps" },
-      { name: "description", content: "Agenda diária da sua equipe de limpeza." },
+      { title: "Schedule — CleanOps" },
+      { name: "description", content: "Your team's daily schedule." },
     ],
   }),
   component: AgendaPage,
 });
 
-const STATUS_META: Record<JobStatus, { label: string; color: string }> = {
-  scheduled: { label: "Agendado", color: "var(--muted-foreground)" },
-  on_way: { label: "A caminho", color: "var(--warning)" },
-  in_progress: { label: "Em curso", color: "var(--info)" },
-  completed: { label: "Concluído", color: "var(--success)" },
-  cancelled: { label: "Cancelado", color: "var(--destructive)" },
+const STATUS_COLOR: Record<JobStatus, string> = {
+  scheduled: "var(--muted-foreground)",
+  on_way: "var(--warning)",
+  in_progress: "var(--info)",
+  completed: "var(--success)",
+  cancelled: "var(--destructive)",
 };
 
-function brl(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  });
-}
-
 function AgendaPage() {
+  const { t } = useTranslation();
   const list = useServerFn(listJobs);
   const create = useServerFn(createJobFn);
   const listC = useServerFn(listClients);
@@ -75,9 +70,9 @@ function AgendaPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["jobs"] });
       setOpen(false);
-      toast.success("Serviço agendado");
+      toast.success(t("agenda.bookedToast"));
     },
-    onError: (e) => toast.error("Erro", { description: e.message }),
+    onError: (e) => toast.error(t("common.error"), { description: e.message }),
   });
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
@@ -87,23 +82,19 @@ function AgendaPage() {
     return d;
   });
 
-  const dayLabel = day.toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
+  const dayLabel = formatLongDate(day);
 
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Agenda"
+        eyebrow={t("agenda.eyebrow")}
         title={capitalize(dayLabel)}
-        subtitle={`${dayJobs.length} serviços programados`}
+        subtitle={t("agenda.jobsCount", { count: dayJobs.length })}
         right={
           <button
             onClick={() => setOpen(true)}
             className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow"
-            aria-label="Novo serviço"
+            aria-label={t("agenda.newJob")}
           >
             <Plus className="size-5" />
           </button>
@@ -123,7 +114,7 @@ function AgendaPage() {
                 }`}
               >
                 <span className="text-[9px] font-bold uppercase tracking-wider">
-                  {d.toLocaleDateString("pt-BR", { weekday: "short" }).slice(0, 3)}
+                  {formatWeekdayShort(d).slice(0, 3)}
                 </span>
                 <span className="text-base font-bold">{d.getDate()}</span>
               </button>
@@ -134,13 +125,11 @@ function AgendaPage() {
 
       <section className="px-5 pt-6">
         {jobsQ.isLoading ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Carregando…</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("common.loading")}</p>
         ) : dayJobs.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-border p-8 text-center">
-            <p className="text-sm font-semibold text-foreground">Nenhum serviço neste dia</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Toque em <b>+</b> para agendar.
-            </p>
+            <p className="text-sm font-semibold text-foreground">{t("agenda.empty")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("agenda.emptyHint")}</p>
           </div>
         ) : (
           <ol className="relative space-y-4 border-l-2 border-border pl-5">
@@ -166,16 +155,15 @@ function AgendaPage() {
 }
 
 function JobItem({ job }: { job: JobRow }) {
-  const meta = STATUS_META[job.status];
-  const time = new Date(job.scheduled_at).toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const { t } = useTranslation();
+  const color = STATUS_COLOR[job.status];
+  const label = t(`status.${job.status}` as const);
+  const time = formatTime(job.scheduled_at);
   return (
     <li className="relative">
       <span
         className="absolute -left-[27px] top-3 grid size-4 place-items-center rounded-full ring-4 ring-background"
-        style={{ backgroundColor: meta.color }}
+        style={{ backgroundColor: color }}
       />
       <Link
         to="/agenda/$jobId"
@@ -187,11 +175,11 @@ function JobItem({ job }: { job: JobRow }) {
           <span
             className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
             style={{
-              backgroundColor: `color-mix(in oklab, ${meta.color} 15%, transparent)`,
-              color: meta.color,
+              backgroundColor: `color-mix(in oklab, ${color} 15%, transparent)`,
+              color,
             }}
           >
-            {meta.label}
+            {label}
           </span>
         </div>
         <h3 className="mt-1 text-base font-semibold text-foreground">{job.title}</h3>
@@ -204,7 +192,7 @@ function JobItem({ job }: { job: JobRow }) {
               <MapPin className="size-3.5" /> {job.address}
             </span>
           )}
-          <span className="ml-auto font-semibold text-foreground">{brl(job.price_cents)}</span>
+          <span className="ml-auto font-semibold text-foreground">{formatCurrency(job.price_cents)}</span>
         </div>
       </Link>
     </li>
@@ -237,10 +225,11 @@ function NewJobSheet({
   onSubmit: (data: CreateJobPayload) => void;
   busy: boolean;
 }) {
+  const { t } = useTranslation();
   const defaultDate = `${defaultDay.getFullYear()}-${pad(defaultDay.getMonth() + 1)}-${pad(defaultDay.getDate())}`;
   const [form, setForm] = useState({
     client_id: clients[0]?.id ?? "",
-    title: "Limpeza padrão",
+    title: t("agenda.defaultTitle"),
     address: clients[0]?.address ?? "",
     date: defaultDate,
     time: "09:00",
@@ -253,8 +242,8 @@ function NewJobSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur">
       <div className="w-full max-w-[480px] rounded-t-3xl bg-card p-5 pb-10 ring-1 ring-border">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Novo serviço</h2>
-          <button onClick={onClose} aria-label="Fechar" className="grid size-8 place-items-center rounded-full bg-secondary">
+          <h2 className="text-lg font-bold">{t("agenda.sheetTitle")}</h2>
+          <button onClick={onClose} aria-label={t("common.close")} className="grid size-8 place-items-center rounded-full bg-secondary">
             <X className="size-4" />
           </button>
         </div>
@@ -278,12 +267,12 @@ function NewJobSheet({
         >
           {clients.length === 0 ? (
             <p className="rounded-xl bg-secondary p-3 text-xs text-muted-foreground">
-              Cadastre um cliente antes para vincular ao serviço (opcional).
+              {t("agenda.addClientFirst")}
             </p>
           ) : (
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Cliente
+                {t("agenda.client")}
               </label>
               <select
                 value={form.client_id}
@@ -293,7 +282,7 @@ function NewJobSheet({
                 }}
                 className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">— sem cliente —</option>
+                <option value="">{t("agenda.noClient")}</option>
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -305,7 +294,7 @@ function NewJobSheet({
           {services.length > 0 && (
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Do catálogo
+                {t("agenda.fromCatalog")}
               </label>
               <select
                 value=""
@@ -321,17 +310,17 @@ function NewJobSheet({
                 }}
                 className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="">— escolher serviço do catálogo —</option>
+                <option value="">{t("agenda.pickFromCatalog")}</option>
                 {services.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} · {(s.default_price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {s.name} · {formatCurrency(s.default_price_cents)}
                   </option>
                 ))}
               </select>
             </div>
           )}
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Serviço</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.service")}</label>
             <input
               required
               value={form.title}
@@ -341,7 +330,7 @@ function NewJobSheet({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Data</label>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.date")}</label>
               <input
                 required
                 type="date"
@@ -351,7 +340,7 @@ function NewJobSheet({
               />
             </div>
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Hora</label>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.time")}</label>
               <input
                 required
                 type="time"
@@ -363,7 +352,7 @@ function NewJobSheet({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Duração (min)</label>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.duration")}</label>
               <input
                 type="number"
                 min={15}
@@ -374,7 +363,7 @@ function NewJobSheet({
               />
             </div>
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Valor (R$)</label>
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.price")} (USD)</label>
               <input
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -385,7 +374,7 @@ function NewJobSheet({
             </div>
           </div>
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Endereço</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.address")}</label>
             <input
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
@@ -393,11 +382,11 @@ function NewJobSheet({
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Equipe</label>
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("agenda.team")}</label>
             <input
               value={form.team_name}
               onChange={(e) => setForm({ ...form, team_name: e.target.value })}
-              placeholder="ex.: Alpha"
+              placeholder={t("agenda.teamPlaceholder")}
               className="mt-1 w-full rounded-xl bg-secondary px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -406,7 +395,7 @@ function NewJobSheet({
             disabled={busy || !form.title.trim()}
             className="mt-2 w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
-            {busy ? "Salvando…" : "Agendar serviço"}
+            {busy ? t("common.saving") : t("agenda.book")}
           </button>
         </form>
       </div>
