@@ -106,7 +106,9 @@ export const updateCouponStatus = createServerFn({ method: "POST" })
       .parse(raw),
   )
   .handler(async ({ context, data }) => {
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: { status: "redeemed" | "cancelled"; redeemed_at?: string } = {
+      status: data.status,
+    };
     if (data.status === "redeemed") patch.redeemed_at = new Date().toISOString();
     const { error } = await context.supabase
       .from("reactivation_coupons")
