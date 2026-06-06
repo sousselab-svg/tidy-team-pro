@@ -28,6 +28,15 @@ const clientsQuery = queryOptions({
   queryFn: () => listClients(),
 });
 
+type NewClientPayload = {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  category: ClientCategory;
+  notes: string | null;
+};
+
 function ClientsPage() {
   const list = useServerFn(listClients);
   const create = useServerFn(createClientFn);
@@ -43,8 +52,7 @@ function ClientsPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: (input: Parameters<typeof createClientFn>[0]["data"]) =>
-      create({ data: input }),
+    mutationFn: (input: NewClientPayload) => create({ data: input }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["clients"] });
       setOpen(false);
@@ -198,14 +206,7 @@ function NewClientSheet({
   busy,
 }: {
   onClose: () => void;
-  onSubmit: (data: {
-    name: string;
-    email: string | null;
-    phone: string | null;
-    address: string | null;
-    category: ClientCategory;
-    notes: string | null;
-  }) => void;
+  onSubmit: (data: NewClientPayload) => void;
   busy: boolean;
 }) {
   const [form, setForm] = useState({
