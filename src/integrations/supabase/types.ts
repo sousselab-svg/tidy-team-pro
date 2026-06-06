@@ -334,6 +334,45 @@ export type Database = {
           },
         ]
       }
+      service_catalog: {
+        Row: {
+          active: boolean
+          category: string | null
+          created_at: string
+          default_duration_minutes: number
+          default_price_cents: number
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          default_duration_minutes?: number
+          default_price_cents?: number
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          default_duration_minutes?: number
+          default_price_cents?: number
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_locations: {
         Row: {
           accuracy_m: number | null
