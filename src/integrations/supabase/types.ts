@@ -91,6 +91,11 @@ export type Database = {
           reactivation_days: number
           reactivation_discount_cents: number
           referral_credit_cents: number
+          sms_confirmation_enabled: boolean
+          sms_reminder_24h_enabled: boolean
+          sms_reminder_2h_enabled: boolean
+          sms_review_request_enabled: boolean
+          twilio_from_number: string | null
           updated_at: string
         }
         Insert: {
@@ -103,6 +108,11 @@ export type Database = {
           reactivation_days?: number
           reactivation_discount_cents?: number
           referral_credit_cents?: number
+          sms_confirmation_enabled?: boolean
+          sms_reminder_24h_enabled?: boolean
+          sms_reminder_2h_enabled?: boolean
+          sms_review_request_enabled?: boolean
+          twilio_from_number?: string | null
           updated_at?: string
         }
         Update: {
@@ -115,6 +125,11 @@ export type Database = {
           reactivation_days?: number
           reactivation_discount_cents?: number
           referral_credit_cents?: number
+          sms_confirmation_enabled?: boolean
+          sms_reminder_24h_enabled?: boolean
+          sms_reminder_2h_enabled?: boolean
+          sms_review_request_enabled?: boolean
+          twilio_from_number?: string | null
           updated_at?: string
         }
         Relationships: []
