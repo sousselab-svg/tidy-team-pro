@@ -31,7 +31,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
     const channelParam = channel ? `&channel=${encodeURIComponent(channel)}` : "";
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
       key,
-    )}&loading=async&callback=${callbackName}${channelParam}`;
+    )}&loading=async&libraries=geometry&callback=${callbackName}${channelParam}`;
     script.async = true;
     script.defer = true;
     script.onerror = () => {
