@@ -17,6 +17,7 @@ import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as NpsTokenRouteImport } from './routes/nps.$token'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
+import { Route as AuthenticatedRecorrenciaRouteImport } from './routes/_authenticated/recorrencia'
 import { Route as AuthenticatedPermissoesRouteImport } from './routes/_authenticated/permissoes'
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedNpsRouteImport } from './routes/_authenticated/nps'
@@ -68,6 +69,12 @@ const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRecorrenciaRoute =
+  AuthenticatedRecorrenciaRouteImport.update({
+    id: '/recorrencia',
+    path: '/recorrencia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPermissoesRoute = AuthenticatedPermissoesRouteImport.update({
   id: '/permissoes',
   path: '/permissoes',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
+  '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/nps/$token': typeof NpsTokenRoute
@@ -160,6 +168,7 @@ export interface FileRoutesByTo {
   '/nps': typeof AuthenticatedNpsRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/permissoes': typeof AuthenticatedPermissoesRoute
+  '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
   '/nps/$token': typeof NpsTokenRoute
@@ -182,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated/nps': typeof AuthenticatedNpsRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
   '/_authenticated/permissoes': typeof AuthenticatedPermissoesRoute
+  '/_authenticated/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
   '/nps/$token': typeof NpsTokenRoute
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/nps'
     | '/orcamentos'
     | '/permissoes'
+    | '/recorrencia'
     | '/relatorios'
     | '/servicos'
     | '/nps/$token'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/nps'
     | '/orcamentos'
     | '/permissoes'
+    | '/recorrencia'
     | '/relatorios'
     | '/servicos'
     | '/nps/$token'
@@ -245,6 +257,7 @@ export interface FileRouteTypes {
     | '/_authenticated/nps'
     | '/_authenticated/orcamentos'
     | '/_authenticated/permissoes'
+    | '/_authenticated/recorrencia'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
     | '/nps/$token'
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof AuthenticatedRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recorrencia': {
+      id: '/_authenticated/recorrencia'
+      path: '/recorrencia'
+      fullPath: '/recorrencia'
+      preLoaderRoute: typeof AuthenticatedRecorrenciaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/permissoes': {
@@ -432,6 +452,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNpsRoute: typeof AuthenticatedNpsRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
   AuthenticatedPermissoesRoute: typeof AuthenticatedPermissoesRoute
+  AuthenticatedRecorrenciaRoute: typeof AuthenticatedRecorrenciaRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -447,6 +468,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNpsRoute: AuthenticatedNpsRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
   AuthenticatedPermissoesRoute: AuthenticatedPermissoesRoute,
+  AuthenticatedRecorrenciaRoute: AuthenticatedRecorrenciaRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
@@ -465,3 +487,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
