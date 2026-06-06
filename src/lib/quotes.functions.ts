@@ -47,7 +47,7 @@ export const listQuotes = createServerFn({ method: "GET" })
       .select("*, client:clients(name, portal_token)")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as QuoteRow[];
+    return (data ?? []) as unknown as QuoteRow[];
   });
 
 export const createQuote = createServerFn({ method: "POST" })
@@ -70,7 +70,7 @@ export const createQuote = createServerFn({ method: "POST" })
       .select("*, client:clients(name, portal_token)")
       .single();
     if (error) throw new Error(error.message);
-    return row as QuoteRow;
+    return row as unknown as QuoteRow;
   });
 
 export const sendQuote = createServerFn({ method: "POST" })
