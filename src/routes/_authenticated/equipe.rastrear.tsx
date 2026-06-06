@@ -2,11 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Pause, Play } from "lucide-react";
+import { MapPin, Pause, Play, Radar } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listTeams } from "@/lib/teams.functions";
 import { recordTeamLocation } from "@/lib/team-locations.functions";
+import { autoCheckIn } from "@/lib/geofence.functions";
 
 export const Route = createFileRoute("/_authenticated/equipe/rastrear")({
   head: () => ({ meta: [{ title: "Rastrear equipe — CleanOps" }] }),
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/equipe/rastrear")({
 function TrackerPage() {
   const list = useServerFn(listTeams);
   const ping = useServerFn(recordTeamLocation);
+  const check = useServerFn(autoCheckIn);
   const { data: teams = [] } = useQuery({ queryKey: ["teams"], queryFn: () => list() });
 
   const [teamId, setTeamId] = useState<string>(() =>
@@ -24,6 +26,7 @@ function TrackerPage() {
   const [active, setActive] = useState(false);
   const [lastPos, setLastPos] = useState<{ lat: number; lng: number; acc: number | null; at: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [checkIns, setCheckIns] = useState<Array<{ title: string; to: string; at: number }>>([]);
   const watchRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -56,6 +59,25 @@ function TrackerPage() {
         } catch (e) {
           // Don't toast on every error to avoid spam
           console.error("location ping failed", e);
+        }
+        try {
+          const { transitions } = await check({
+            data: { team_id: teamId, lat: latitude, lng: longitude },
+          });
+          if (transitions.length) {
+            setCheckIns((prev) => [
+              ...transitions.map((t) => ({ title: t.title, to: t.to, at: Date.now() })),
+              ...prev,
+            ].slice(0, 8));
+            for (const t of transitions) {
+              toast.success(
+                t.to === "in_progress" ? "Check-in automático" : "A caminho",
+                { description: `${t.title} · ${t.distance_m} m` },
+              );
+            }
+          }
+        } catch (e) {
+          console.error("auto check-in failed", e);
         }
       },
       (err) => {
@@ -143,6 +165,31 @@ function TrackerPage() {
           O navegador pedirá permissão de localização. A posição é atualizada automaticamente
           enquanto esta página estiver aberta. Para máxima precisão, mantenha a tela ligada.
         </p>
+
+        <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
+          <div className="flex items-center gap-2">
+            <Radar className="size-4 text-primary" />
+            <p className="text-sm font-bold">Check-in automático</p>
+          </div>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Quando você entra no raio do serviço, o status muda sozinho para "Em andamento".
+          </p>
+          {checkIns.length === 0 ? (
+            <p className="mt-3 text-xs text-muted-foreground">Nenhum check-in nesta sessão.</p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {checkIns.map((c, i) => (
+                <li key={i} className="flex items-center justify-between text-xs">
+                  <span className="truncate font-semibold">{c.title}</span>
+                  <span className="text-muted-foreground">
+                    {c.to === "in_progress" ? "Em andamento" : "A caminho"} ·{" "}
+                    {new Date(c.at).toLocaleTimeString("pt-BR")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
     </MobileShell>
   );

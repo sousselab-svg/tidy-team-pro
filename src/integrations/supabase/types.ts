@@ -165,11 +165,16 @@ export type Database = {
       jobs: {
         Row: {
           address: string | null
+          arrived_at: string | null
+          auto_check_in_enabled: boolean
           checklist: Json
           client_id: string | null
           created_at: string
           duration_minutes: number
+          geofence_radius_m: number
           id: string
+          lat: number | null
+          lng: number | null
           notes: string | null
           owner_id: string
           price_cents: number
@@ -182,11 +187,16 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          arrived_at?: string | null
+          auto_check_in_enabled?: boolean
           checklist?: Json
           client_id?: string | null
           created_at?: string
           duration_minutes?: number
+          geofence_radius_m?: number
           id?: string
+          lat?: number | null
+          lng?: number | null
           notes?: string | null
           owner_id: string
           price_cents?: number
@@ -199,11 +209,16 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          arrived_at?: string | null
+          auto_check_in_enabled?: boolean
           checklist?: Json
           client_id?: string | null
           created_at?: string
           duration_minutes?: number
+          geofence_radius_m?: number
           id?: string
+          lat?: number | null
+          lng?: number | null
           notes?: string | null
           owner_id?: string
           price_cents?: number

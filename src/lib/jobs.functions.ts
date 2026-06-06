@@ -22,6 +22,11 @@ export type JobRow = {
   team_id: string | null;
   checklist: ChecklistItem[];
   notes: string | null;
+  lat: number | null;
+  lng: number | null;
+  geofence_radius_m: number;
+  auto_check_in_enabled: boolean;
+  arrived_at: string | null;
   created_at: string;
   updated_at: string;
   client?: { name: string } | null;
@@ -54,6 +59,8 @@ const JobUpdateInput = z.object({
     team_name: z.string().max(100).nullable().optional(),
     team_id: z.string().uuid().nullable().optional(),
     notes: z.string().max(2000).nullable().optional(),
+    geofence_radius_m: z.number().int().min(20).max(2000).optional(),
+    auto_check_in_enabled: z.boolean().optional(),
     status: z
       .enum(["scheduled", "on_way", "in_progress", "completed", "cancelled"])
       .optional(),
