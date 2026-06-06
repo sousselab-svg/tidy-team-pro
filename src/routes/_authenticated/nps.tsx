@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,11 +9,12 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listNps, type NpsSurveyWithJob } from "@/lib/nps.functions";
 
 export const Route = createFileRoute("/_authenticated/nps")({
-  head: () => ({ meta: [{ title: "Avaliações NPS — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Reviews — CleanOps" }] }),
   component: NpsPage,
 });
 
 function NpsPage() {
+  const { t } = useTranslation();
   const fn = useServerFn(listNps);
   const { data, isLoading } = useQuery({ queryKey: ["nps-list"], queryFn: () => fn() });
 
@@ -28,9 +31,9 @@ function NpsPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="CleanOps"
-        title="Avaliações NPS"
-        subtitle={`${answered.length} resposta(s) de ${rows.length} envio(s)`}
+        eyebrow={t("nps.eyebrow")}
+        title={t("nps.title")}
+        subtitle={`${answered.length} / ${rows.length}`}
         right={
           <Link
             to="/"
@@ -121,8 +124,8 @@ function NpsRow({ row }: { row: NpsSurveyWithJob }) {
       <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
         <span>
           {submitted
-            ? `Respondido em ${new Date(row.submitted_at!).toLocaleDateString("pt-BR")}`
-            : `Enviado em ${new Date(row.sent_at ?? row.created_at).toLocaleDateString("pt-BR")}`}
+            ? `Respondido em ${formatDate(row.submitted_at!)}`
+            : `Enviado em ${formatDate(row.sent_at ?? row.created_at)}`}
         </span>
         {!submitted && (
           <button

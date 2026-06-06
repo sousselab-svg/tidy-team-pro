@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -8,16 +10,17 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listServices, upsertService, deleteService, type ServiceItem } from "@/lib/services.functions";
 
 export const Route = createFileRoute("/_authenticated/servicos")({
-  head: () => ({ meta: [{ title: "Catálogo de Serviços — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Services — CleanOps" }] }),
   component: ServicesPage,
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const servicesQuery = queryOptions({ queryKey: ["services"], queryFn: () => listServices() });
 
 function ServicesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const fnList = useServerFn(listServices);
   const fnUpsert = useServerFn(upsertService);
@@ -60,9 +63,9 @@ function ServicesPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Cadastros"
-        title="Catálogo de serviços"
-        subtitle="Modelos com preço e duração padrão"
+        eyebrow={t("services.eyebrow")}
+        title={t("services.title")}
+        subtitle={t("services.subtitle")}
         right={
           <button
             onClick={() =>

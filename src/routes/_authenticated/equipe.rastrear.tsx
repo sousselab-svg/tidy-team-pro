@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from "@/lib/format";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -152,7 +153,7 @@ function TrackerPage() {
               <div>
                 <p className="font-mono">{lastPos.lat.toFixed(5)}, {lastPos.lng.toFixed(5)}</p>
                 {lastPos.acc != null && <p>± {Math.round(lastPos.acc)} m</p>}
-                <p>{new Date(lastPos.at).toLocaleTimeString("pt-BR")}</p>
+                <p>{formatTime(lastPos.at)}</p>
               </div>
             </div>
           )}
@@ -183,7 +184,7 @@ function TrackerPage() {
                   <span className="truncate font-semibold">{c.title}</span>
                   <span className="text-muted-foreground">
                     {c.to === "in_progress" ? "Em andamento" : "A caminho"} ·{" "}
-                    {new Date(c.at).toLocaleTimeString("pt-BR")}
+                    {formatTime(c.at)}
                   </span>
                 </li>
               ))}

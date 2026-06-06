@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,12 +11,12 @@ import { getSettings } from "@/lib/settings.functions";
 import { listReminders, type ReminderItem, type ReminderKind } from "@/lib/reminders.functions";
 
 export const Route = createFileRoute("/_authenticated/lembretes")({
-  head: () => ({ meta: [{ title: "Lembretes — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Reminders — CleanOps" }] }),
   component: RemindersPage,
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const remindersQuery = queryOptions({ queryKey: ["reminders"], queryFn: () => listReminders() });
 const settingsQuery = queryOptions({ queryKey: ["settings"], queryFn: () => getSettings() });
@@ -36,7 +38,7 @@ function buildMessage(item: ReminderItem, companyName: string | null, pixKey: st
   switch (item.kind) {
     case "invoice_due_soon": {
       const venc = item.due_date
-        ? new Date(item.due_date + "T00:00:00").toLocaleDateString("pt-BR")
+        ? formatDate(item.due_date + "T00:00:00")
         : "";
       const lines = [
         `Oi ${name}! Aqui é ${company}.`,
@@ -50,7 +52,7 @@ function buildMessage(item: ReminderItem, companyName: string | null, pixKey: st
     case "invoice_overdue": {
       const lines = [
         `Oi ${name}! Aqui é ${company}.`,
-        `Identificamos que a fatura *${item.title}*${item.amount_cents != null ? ` (*${brl(item.amount_cents)}*)` : ""} está em aberto desde ${item.due_date ? new Date(item.due_date + "T00:00:00").toLocaleDateString("pt-BR") : "o vencimento"}.`,
+        `Identificamos que a fatura *${item.title}*${item.amount_cents != null ? ` (*${brl(item.amount_cents)}*)` : ""} está em aberto desde ${item.due_date ? formatDate(item.due_date + "T00:00:00") : "o vencimento"}.`,
         "Pode confirmar o pagamento para a gente regularizar?",
       ];
       if (pixKey) lines.push(`Chave PIX: ${pixKey}`);
@@ -59,7 +61,7 @@ function buildMessage(item: ReminderItem, companyName: string | null, pixKey: st
     }
     case "job_tomorrow": {
       const when = item.scheduled_at
-        ? new Date(item.scheduled_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
+        ? formatDateTime(item.scheduled_at)
         : "amanhã";
       return [
         `Oi ${name}! Aqui é ${company}.`,
@@ -86,6 +88,7 @@ function waLink(phone: string | null, message: string) {
 }
 
 function RemindersPage() {
+  const { t } = useTranslation();
   const listFn = useServerFn(listReminders);
   const settingsFn = useServerFn(getSettings);
   const { data: items } = useQuery({ ...remindersQuery, queryFn: () => listFn() });
@@ -108,9 +111,9 @@ function RemindersPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Atendimento"
-        title="Lembretes"
-        subtitle="Mensagens prontas para enviar pelo WhatsApp"
+        eyebrow={t("reminders.eyebrow")}
+        title={t("reminders.title")}
+        subtitle={t("reminders.subtitle")}
       />
 
       <div className="flex gap-2 overflow-x-auto px-5 pb-3">

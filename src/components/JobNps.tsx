@@ -1,3 +1,4 @@
+import { formatDate, formatDateTime, formatTime } from "@/lib/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Copy, Send, Star } from "lucide-react";
@@ -57,7 +58,7 @@ export function JobNps({ jobId, jobCompleted }: { jobId: string; jobCompleted: b
         <div className="mt-3 rounded-xl bg-secondary p-3">
           <p className="text-xs text-muted-foreground">Cliente avaliou em</p>
           <p className="text-sm font-semibold">
-            {new Date(survey.submitted_at).toLocaleString("pt-BR")}
+            {formatDateTime(survey.submitted_at)}
           </p>
           <p className="mt-2 text-2xl font-bold text-foreground">{survey.score}/10</p>
           {survey.comment && (

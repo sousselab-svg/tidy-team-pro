@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -10,12 +12,12 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getReports, type ReportsData } from "@/lib/reports.functions";
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Reports — CleanOps" }] }),
   component: ReportsPage,
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const STATUS_LABELS: Record<string, string> = {
   scheduled: "Agendado",
@@ -28,7 +30,7 @@ const STATUS_COLORS = ["#3b82f6", "#06b6d4", "#f59e0b", "#10b981", "#ef4444", "#
 
 function fmtMonth(k: string) {
   const [y, m] = k.split("-");
-  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("pt-BR", { month: "short" });
+  return formatMonthShort(new Date(Number(y), Number(m) - 1, 1));
 }
 
 function downloadCsv(filename: string, rows: (string | number)[][]) {
@@ -45,6 +47,7 @@ function downloadCsv(filename: string, rows: (string | number)[][]) {
 }
 
 function ReportsPage() {
+  const { t } = useTranslation();
   const fn = useServerFn(getReports);
   const [months, setMonths] = useState(6);
   const options = useMemo(
@@ -72,9 +75,9 @@ function ReportsPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="BI"
-        title="Relatórios"
-        subtitle="Receita, serviços e clientes"
+        eyebrow={t("reports.eyebrow")}
+        title={t("reports.title")}
+        subtitle={t("dashboard.reportsSubtitle")}
         right={
           data ? (
             <button

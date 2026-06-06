@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,7 +19,7 @@ import {
 } from "@/lib/invoices.functions";
 
 export const Route = createFileRoute("/_authenticated/faturamento")({
-  head: () => ({ meta: [{ title: "Faturamento — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Billing — CleanOps" }] }),
   component: BillingPage,
 });
 
@@ -25,7 +27,7 @@ const invoicesQuery = queryOptions({ queryKey: ["invoices"], queryFn: () => list
 const clientsQuery = queryOptions({ queryKey: ["clients"], queryFn: () => listClients() });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const STATUS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
   open: { label: "Em aberto", cls: "bg-[color:var(--info)]/15 text-[color:var(--info)]" },
@@ -34,6 +36,7 @@ const STATUS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
 };
 
 function BillingPage() {
+  const { t } = useTranslation();
   const listI = useServerFn(listInvoices);
   const listC = useServerFn(listClients);
   const create = useServerFn(createInvoice);
@@ -100,9 +103,9 @@ function BillingPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Finanças"
-        title="Faturamento"
-        subtitle={`${brl(paid)} recebido · ${brl(openSum)} em aberto`}
+        eyebrow={t("billing.eyebrow")}
+        title={t("billing.title")}
+        subtitle={`${brl(paid)} · ${brl(openSum)}`}
         right={
           <button onClick={() => setOpen(true)} className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow">
             <Plus className="size-5" />
@@ -140,7 +143,7 @@ function BillingPage() {
                       <h3 className="truncate text-base font-semibold">{inv.title}</h3>
                       {inv.due_date && (
                         <p className="text-[11px] text-muted-foreground">
-                          Vence {new Date(inv.due_date).toLocaleDateString("pt-BR")}
+                          {t("billing.due", { date: formatDate(inv.due_date) })}
                         </p>
                       )}
                     </div>

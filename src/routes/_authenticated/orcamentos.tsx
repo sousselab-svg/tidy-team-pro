@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate, formatDateTime, formatTime, formatMonthShort } from "@/lib/format";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -18,7 +20,7 @@ import { createInvoiceFromQuote } from "@/lib/invoices.functions";
 import { listServices, type ServiceItem } from "@/lib/services.functions";
 
 export const Route = createFileRoute("/_authenticated/orcamentos")({
-  head: () => ({ meta: [{ title: "Orçamentos — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Quotes — CleanOps" }] }),
   component: QuotesPage,
 });
 
@@ -30,7 +32,7 @@ const servicesQueryOpts = queryOptions({
 });
 
 const brl = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  formatCurrency(cents);
 
 const STATUS_META: Record<QuoteRow["status"], { label: string; cls: string }> = {
   draft: { label: "Rascunho", cls: "bg-secondary text-muted-foreground" },
@@ -40,6 +42,7 @@ const STATUS_META: Record<QuoteRow["status"], { label: string; cls: string }> = 
 };
 
 function QuotesPage() {
+  const { t } = useTranslation();
   const listQ = useServerFn(listQuotes);
   const listC = useServerFn(listClients);
   const create = useServerFn(createQuote);
@@ -101,9 +104,9 @@ function QuotesPage() {
   return (
     <MobileShell>
       <PageHeader
-        eyebrow="Vendas"
-        title="Orçamentos"
-        subtitle={`${quotes.length} no total`}
+        eyebrow={t("quotes.eyebrow")}
+        title={t("quotes.title")}
+        subtitle={t("quotes.subtitle", { count: quotes.length })}
         right={
           <button
             onClick={() => setOpen(true)}
@@ -266,7 +269,7 @@ function NewQuoteSheet({
                       <option value="">— do catálogo —</option>
                       {services.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.name} · {(s.default_price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                          {s.name} · {formatCurrency(s.default_price_cents)}
                         </option>
                       ))}
                     </select>
