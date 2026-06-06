@@ -165,6 +165,31 @@ function TrackerPage() {
           O navegador pedirá permissão de localização. A posição é atualizada automaticamente
           enquanto esta página estiver aberta. Para máxima precisão, mantenha a tela ligada.
         </p>
+
+        <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
+          <div className="flex items-center gap-2">
+            <Radar className="size-4 text-primary" />
+            <p className="text-sm font-bold">Check-in automático</p>
+          </div>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Quando você entra no raio do serviço, o status muda sozinho para "Em andamento".
+          </p>
+          {checkIns.length === 0 ? (
+            <p className="mt-3 text-xs text-muted-foreground">Nenhum check-in nesta sessão.</p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {checkIns.map((c, i) => (
+                <li key={i} className="flex items-center justify-between text-xs">
+                  <span className="truncate font-semibold">{c.title}</span>
+                  <span className="text-muted-foreground">
+                    {c.to === "in_progress" ? "Em andamento" : "A caminho"} ·{" "}
+                    {new Date(c.at).toLocaleTimeString("pt-BR")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
     </MobileShell>
   );
