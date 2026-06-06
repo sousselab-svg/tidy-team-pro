@@ -10,7 +10,7 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listServices, upsertService, deleteService, type ServiceItem } from "@/lib/services.functions";
 
 export const Route = createFileRoute("/_authenticated/servicos")({
-  head: () => ({ meta: [{ title: "Catálogo de Serviços — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Services — CleanOps" }] }),
   component: ServicesPage,
 });
 

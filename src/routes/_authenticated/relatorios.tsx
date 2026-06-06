@@ -12,7 +12,7 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { getReports, type ReportsData } from "@/lib/reports.functions";
 
 export const Route = createFileRoute("/_authenticated/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Reports — CleanOps" }] }),
   component: ReportsPage,
 });
 

@@ -11,7 +11,7 @@ import { getSettings } from "@/lib/settings.functions";
 import { listReminders, type ReminderItem, type ReminderKind } from "@/lib/reminders.functions";
 
 export const Route = createFileRoute("/_authenticated/lembretes")({
-  head: () => ({ meta: [{ title: "Lembretes — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Reminders — CleanOps" }] }),
   component: RemindersPage,
 });
 

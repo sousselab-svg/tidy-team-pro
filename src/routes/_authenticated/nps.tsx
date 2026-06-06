@@ -9,7 +9,7 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { listNps, type NpsSurveyWithJob } from "@/lib/nps.functions";
 
 export const Route = createFileRoute("/_authenticated/nps")({
-  head: () => ({ meta: [{ title: "Avaliações NPS — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Reviews — CleanOps" }] }),
   component: NpsPage,
 });
 

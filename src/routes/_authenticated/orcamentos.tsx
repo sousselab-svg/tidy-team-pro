@@ -20,7 +20,7 @@ import { createInvoiceFromQuote } from "@/lib/invoices.functions";
 import { listServices, type ServiceItem } from "@/lib/services.functions";
 
 export const Route = createFileRoute("/_authenticated/orcamentos")({
-  head: () => ({ meta: [{ title: "Orçamentos — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Quotes — CleanOps" }] }),
   component: QuotesPage,
 });
 

@@ -19,7 +19,7 @@ import {
 } from "@/lib/invoices.functions";
 
 export const Route = createFileRoute("/_authenticated/faturamento")({
-  head: () => ({ meta: [{ title: "Faturamento — CleanOps" }] }),
+  head: () => ({ meta: [{ title: "Billing — CleanOps" }] }),
   component: BillingPage,
 });
 
