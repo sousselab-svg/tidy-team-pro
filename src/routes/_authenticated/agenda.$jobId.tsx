@@ -251,6 +251,74 @@ function JobDetailPage() {
             );
           })()}
 
+          <section className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-border">
+            <div className="flex items-center gap-2">
+              <Radar className="size-4 text-primary" />
+              <p className="text-sm font-bold">Geofence & check-in automático</p>
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Quando a equipe entrar no raio, o serviço muda para "Em andamento".
+            </p>
+
+            {job.lat == null || job.lng == null ? (
+              <button
+                onClick={() => geocodeMut.mutate()}
+                disabled={geocodeMut.isPending || !job.address}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-50"
+              >
+                <MapPin className="size-4" />
+                {geocodeMut.isPending ? "Localizando…" : "Localizar endereço"}
+              </button>
+            ) : (
+              <>
+                <p className="mt-2 font-mono text-[11px] text-muted-foreground">
+                  {job.lat.toFixed(5)}, {job.lng.toFixed(5)}
+                </p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <label className="text-xs font-semibold">Raio (m)</label>
+                  <input
+                    type="number"
+                    min={20}
+                    max={2000}
+                    step={10}
+                    defaultValue={job.geofence_radius_m}
+                    onBlur={(e) => {
+                      const v = Math.max(20, Math.min(2000, Number(e.target.value) || 150));
+                      if (v !== job.geofence_radius_m) updateMut.mutate({ geofence_radius_m: v });
+                    }}
+                    className="w-24 rounded-lg bg-secondary px-2 py-1.5 text-right text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <label className="text-xs font-semibold">Auto check-in</label>
+                  <input
+                    type="checkbox"
+                    checked={job.auto_check_in_enabled}
+                    onChange={(e) => updateMut.mutate({ auto_check_in_enabled: e.target.checked })}
+                    className="size-5 accent-[color:var(--primary)]"
+                  />
+                </div>
+                <button
+                  onClick={() => geocodeMut.mutate()}
+                  disabled={geocodeMut.isPending || !job.address}
+                  className="mt-3 w-full rounded-xl bg-secondary py-2 text-xs font-semibold text-muted-foreground disabled:opacity-50"
+                >
+                  {geocodeMut.isPending ? "Atualizando…" : "Refazer geocodificação"}
+                </button>
+              </>
+            )}
+
+            {job.arrived_at && (
+              <p className="mt-3 text-[11px] text-[color:var(--success)]">
+                ✓ Chegada registrada às{" "}
+                {new Date(job.arrived_at).toLocaleTimeString("pt-BR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            )}
+          </section>
+
           <div className="mt-5 space-y-2">
             {meta.next && (
               <button
