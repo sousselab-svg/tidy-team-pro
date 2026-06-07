@@ -73,10 +73,15 @@ function AgendaPage() {
     const start = new Date(day);
     const end = new Date(day);
     end.setDate(end.getDate() + 1);
-    return (jobsQ.data ?? []).filter((j) => {
-      const d = new Date(j.scheduled_at);
-      return d >= start && d < end;
-    });
+    return (jobsQ.data ?? [])
+      .filter((j) => {
+        const d = new Date(j.scheduled_at);
+        return d >= start && d < end;
+      })
+      .sort(
+        (a, b) =>
+          new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime(),
+      );
   }, [jobsQ.data, day]);
 
   const createMut = useMutation({
