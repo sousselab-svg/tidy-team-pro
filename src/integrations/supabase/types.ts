@@ -329,6 +329,83 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          created_at: string
+          doc_type: string
+          document_id: string
+          id: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          created_at?: string
+          doc_type: string
+          document_id: string
+          id?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          created_at?: string
+          doc_type?: string
+          document_id?: string
+          id?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_acceptances_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_documents: {
+        Row: {
+          created_at: string
+          doc_type: string
+          effective_at: string
+          id: string
+          is_current: boolean
+          summary: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          effective_at?: string
+          id?: string
+          is_current?: boolean
+          summary?: string | null
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          effective_at?: string
+          id?: string
+          is_current?: boolean
+          summary?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
