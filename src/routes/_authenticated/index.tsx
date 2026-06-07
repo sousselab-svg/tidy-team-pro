@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles, Route as RouteIcon, Brain } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { NotificationsBell } from "@/components/NotificationsBell";
@@ -24,6 +25,23 @@ const statsQuery = queryOptions({ queryKey: ["dashboard-stats"], queryFn: () => 
 
 function Dashboard() {
   const { t } = useTranslation();
+  const [displayName, setDisplayName] = useState<string>("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      const meta = (u?.user_metadata ?? {}) as Record<string, unknown>;
+      const name =
+        (meta.full_name as string) ||
+        (meta.name as string) ||
+        (u?.email ? u.email.split("@")[0] : "");
+      setDisplayName(name);
+    });
+  }, []);
+  const hour = new Date().getHours();
+  const greetingKey =
+    hour < 12 ? "dashboard.greetingMorning" : hour < 18 ? "dashboard.greetingAfternoon" : "dashboard.greetingEvening";
+  const firstName = displayName.split(" ")[0] ?? "";
+  const headerTitle = firstName ? `${t(greetingKey)}, ${firstName}` : t(greetingKey);
   const STATUS_TINT: Record<string, string> = {
     scheduled: "var(--muted-foreground)",
     on_way: "var(--warning)",
@@ -62,7 +80,7 @@ function Dashboard() {
     <MobileShell>
       <PageHeader
         eyebrow={t("brand")}
-        title={t("dashboard.title")}
+        title={headerTitle}
         subtitle={t("dashboard.subtitle")}
         right={
           <div className="flex items-center gap-2">
