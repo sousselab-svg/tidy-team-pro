@@ -250,3 +250,39 @@ export const exportMyDataNow = createServerFn({ method: "POST" })
     });
     return payload;
   });
+
+export const confirmDeletionRequest = createServerFn({ method: "POST" })
+  .inputValidator((data: { token: string }) => {
+    if (!data?.token || typeof data.token !== "string") {
+      throw new Error("invalid_token");
+    }
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { data: row, error } = await supabaseAdmin
+      .from("deletion_confirmations")
+      .select("id, user_id, request_id, expires_at, confirmed_at")
+      .eq("token", data.token)
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) throw new Error("Token inválido.");
+    if (row.confirmed_at) {
+      return { ok: true, alreadyConfirmed: true };
+    }
+    if (new Date(row.expires_at).getTime() < Date.now()) {
+      throw new Error("Token expirado. Solicite a exclusão novamente.");
+    }
+    await supabaseAdmin
+      .from("deletion_confirmations")
+      .update({ confirmed_at: new Date().toISOString() })
+      .eq("id", row.id);
+    await supabaseAdmin
+      .from("data_subject_requests")
+      .update({ status: "processing" })
+      .eq("id", row.request_id)
+      .eq("user_id", row.user_id);
+    return { ok: true, alreadyConfirmed: false };
+  });
