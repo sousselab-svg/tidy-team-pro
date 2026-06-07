@@ -87,3 +87,24 @@ Para adicionar mais (câmera, geolocalização, push, biometria, etc.), consulte
 ---
 
 Documentação oficial: https://capacitorjs.com/docs
+
+## Ícone e Splash Screen
+
+Os assets-fonte já estão no projeto:
+
+- `src/assets/app-icon.png` — ícone do app (1024×1024, vassoura + sparkle, gradiente verde)
+- `src/assets/splash.png` — splash screen (1248×1920, logo CleanOps em fundo verde)
+
+Para gerar todas as resoluções nativas (iOS + Android), use o `@capacitor/assets`:
+
+```bash
+bun add -d @capacitor/assets
+mkdir -p assets
+cp src/assets/app-icon.png assets/icon.png
+cp src/assets/splash.png assets/splash.png
+cp src/assets/splash.png assets/splash-dark.png
+bunx @capacitor/assets generate --iconBackgroundColor '#10b981' --splashBackgroundColor '#10b981'
+bunx cap sync
+```
+
+Isso gera automaticamente todos os ícones (iOS @1x/@2x/@3x, Android mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi, adaptive icons) e splash screens nas pastas nativas. A cor de fundo verde (#10b981) já está configurada em `capacitor.config.ts` (plugin `SplashScreen`).
