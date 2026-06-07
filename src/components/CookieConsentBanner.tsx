@@ -78,7 +78,6 @@ export function CookieConsentBanner() {
             Só essenciais
           </button>
           <Link
-            to="/_authenticated/privacidade-dados" as any
             to="/privacidade"
             className="flex-1 rounded-xl border border-border py-2.5 text-center text-xs font-semibold"
           >
