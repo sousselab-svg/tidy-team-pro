@@ -156,14 +156,44 @@ export const createDataRequest = createServerFn({ method: "POST" })
     if (existing) {
       throw new Error("Já existe uma solicitação em andamento deste tipo.");
     }
-    const { error } = await supabase.from("data_subject_requests").insert({
-      user_id: userId,
-      kind: data.kind,
-      notes: data.notes?.trim() || null,
-      status: "pending",
-    });
+    await checkRateLimit(supabase, userId, `dsr:${data.kind}`, 60, 3);
+
+    const { data: inserted, error } = await supabase
+      .from("data_subject_requests")
+      .insert({
+        user_id: userId,
+        kind: data.kind,
+        notes: data.notes?.trim() || null,
+        status: data.kind === "deletion" ? "pending" : "pending",
+      })
+      .select("id")
+      .single();
     if (error) throw error;
-    return { ok: true };
+
+    // Deletion requires double opt-in via email/link
+    if (data.kind === "deletion") {
+      const { data: token, error: tErr } = await supabase
+        .from("deletion_confirmations")
+        .insert({ user_id: userId, request_id: inserted.id })
+        .select("token, expires_at")
+        .single();
+      if (tErr) throw tErr;
+
+      const origin =
+        getRequest()?.headers.get("origin") ??
+        getRequest()?.headers.get("referer") ??
+        "";
+      const confirmUrl = origin
+        ? `${origin.replace(/\/$/, "")}/confirmar-exclusao/${token.token}`
+        : `/confirmar-exclusao/${token.token}`;
+      return {
+        ok: true,
+        requiresConfirmation: true,
+        confirmUrl,
+        expiresAt: token.expires_at,
+      };
+    }
+    return { ok: true, requiresConfirmation: false };
   });
 
 export const cancelDataRequest = createServerFn({ method: "POST" })
@@ -188,6 +218,7 @@ export const exportMyDataNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    await checkRateLimit(supabase, userId, "export", 10, 1);
     const [profile, consent, acceptances, clients, jobs, invoices, requests] =
       await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
