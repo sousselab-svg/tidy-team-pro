@@ -658,7 +658,7 @@ function LinkOperatorSheet({
           </button>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Peça para o operador criar uma conta em <strong>/auth</strong> com o email abaixo, depois confirme aqui.
+          Enviamos um convite por email com um link para o operador definir a senha e entrar. Se a conta já existir, vinculamos direto.
         </p>
         <div className="mt-4 space-y-3">
           <Field label="Email da conta do operador" value={email} onChange={setEmail} placeholder="operador@exemplo.com" />
@@ -668,7 +668,7 @@ function LinkOperatorSheet({
             onClick={() => onSubmit(email.trim())}
             className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
-            {busy ? "Vinculando…" : "Vincular"}
+            {busy ? "Enviando…" : "Enviar convite"}
           </button>
         </div>
       </div>
