@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { ArrowUpRight, BarChart3, Bell, Calendar, FileText, MapPin, Plus, ShieldCheck, Star, Wallet, Briefcase, Repeat, Gift, Sparkles, Route as RouteIcon, Brain } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
 import { useTranslation } from "react-i18next";
@@ -64,18 +65,21 @@ function Dashboard() {
         title={t("dashboard.title")}
         subtitle={t("dashboard.subtitle")}
         right={
-          <Link
-            to="/lembretes"
-            className="relative grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
-            aria-label={t("nav.reminders")}
-          >
-            <Bell className="size-5" />
-            {(data?.pendingProofsCount ?? 0) > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
-                {data!.pendingProofsCount}
-              </span>
-            )}
-          </Link>
+          <div className="flex items-center gap-2">
+            <NotificationsBell />
+            <Link
+              to="/lembretes"
+              className="relative grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground"
+              aria-label={t("nav.reminders")}
+            >
+              <Bell className="size-5" />
+              {(data?.pendingProofsCount ?? 0) > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+                  {data!.pendingProofsCount}
+                </span>
+              )}
+            </Link>
+          </div>
         }
       />
 
