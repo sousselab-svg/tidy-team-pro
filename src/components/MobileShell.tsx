@@ -8,6 +8,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getPendingProofsCount } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const adminNav = [
   { to: "/", labelKey: "nav.dashboard", Icon: Home },
@@ -45,6 +46,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const proofsCount = data?.count ?? 0;
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <OfflineBanner />
       <div className="mx-auto max-w-[480px] min-h-screen pb-24">{children}</div>
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur">
         <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-2 pt-2 pb-5">
