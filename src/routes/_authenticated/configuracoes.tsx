@@ -184,6 +184,18 @@ function SettingsPage() {
           <span className="text-sm font-semibold">Termos de Uso</span>
           <span className="text-xs text-muted-foreground">Abrir</span>
         </Link>
+        <Link
+          to="/privacidade-dados"
+          className="flex items-center justify-between rounded-xl bg-card px-4 py-3 ring-1 ring-border"
+        >
+          <div>
+            <p className="text-sm font-semibold">Privacidade e Dados (LGPD/GDPR)</p>
+            <p className="text-xs text-muted-foreground">
+              Consentimentos, exportar dados, excluir conta
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-primary">Abrir</span>
+        </Link>
       </section>
     </MobileShell>
   );

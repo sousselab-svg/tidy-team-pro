@@ -134,6 +134,75 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_preferences: {
+        Row: {
+          analytics: boolean
+          created_at: string
+          functional: boolean
+          marketing: boolean
+          policy_version: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics?: boolean
+          created_at?: string
+          functional?: boolean
+          marketing?: boolean
+          policy_version?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics?: boolean
+          created_at?: string
+          functional?: boolean
+          marketing?: boolean
+          policy_version?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_subject_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          notes: string | null
+          payload: Json | null
+          requested_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          notes?: string | null
+          payload?: Json | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          notes?: string | null
+          payload?: Json | null
+          requested_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount_cents: number
