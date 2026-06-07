@@ -165,6 +165,26 @@ function SettingsPage() {
           <span className="text-xs font-semibold text-primary">{t("common.open")}</span>
         </Link>
       </section>
+
+      <section className="space-y-2 px-5 pt-4 pb-8">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Legal
+        </p>
+        <Link
+          to="/privacidade"
+          className="flex items-center justify-between rounded-xl bg-card px-4 py-3 ring-1 ring-border"
+        >
+          <span className="text-sm font-semibold">Política de Privacidade</span>
+          <span className="text-xs text-muted-foreground">Abrir</span>
+        </Link>
+        <Link
+          to="/termos"
+          className="flex items-center justify-between rounded-xl bg-card px-4 py-3 ring-1 ring-border"
+        >
+          <span className="text-sm font-semibold">Termos de Uso</span>
+          <span className="text-xs text-muted-foreground">Abrir</span>
+        </Link>
+      </section>
     </MobileShell>
   );
 }
