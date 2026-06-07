@@ -487,6 +487,39 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          goals: string[]
+          goals_other: string | null
+          onboarded_at: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          goals?: string[]
+          goals_other?: string | null
+          onboarded_at?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          goals?: string[]
+          goals_other?: string | null
+          onboarded_at?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           approved_at: string | null
