@@ -37,6 +37,7 @@ import { Radar } from "lucide-react";
 import { JobPhotos } from "@/components/JobPhotos";
 import { SignaturePad } from "@/components/SignaturePad";
 import { JobNps } from "@/components/JobNps";
+import { enqueueJobPatch, readCache, useOnlineStatus, writeCache } from "@/lib/offline";
 
 export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
@@ -86,18 +87,46 @@ function JobDetailPage() {
   const geocode = useServerFn(geocodeJob);
 
   const [editing, setEditing] = useState(false);
+  const online = useOnlineStatus();
 
-  const jobQ = useQuery({ queryKey: ["job", jobId], queryFn: () => get({ data: { id: jobId } }) });
+  const jobQ = useQuery({
+    queryKey: ["job", jobId],
+    queryFn: async () => {
+      const data = await get({ data: { id: jobId } });
+      if (data) writeCache(`job:${jobId}`, data);
+      return data;
+    },
+    initialData: () => readCache<JobRow>(`job:${jobId}`),
+    retry: online,
+    networkMode: "always",
+  });
   const clientsQ = useQuery({ queryKey: ["clients"], queryFn: () => listC(), enabled: editing });
   const teamsQ = useQuery({ queryKey: ["teams"], queryFn: () => listT() });
 
   const updateMut = useMutation({
-    mutationFn: (patch: JobPatch) => update({ data: { id: jobId, patch } }),
-    onSuccess: () => {
+    mutationFn: async (patch: JobPatch) => {
+      if (!navigator.onLine) {
+        enqueueJobPatch(jobId, patch as Record<string, unknown>);
+        // Optimistically update the cached job so the UI reflects the change
+        const current = readCache<JobRow>(`job:${jobId}`) ?? jobQ.data;
+        if (current) {
+          const next = { ...current, ...(patch as Partial<JobRow>) } as JobRow;
+          writeCache(`job:${jobId}`, next);
+          qc.setQueryData(["job", jobId], next);
+        }
+        return { ok: true, queued: true };
+      }
+      return update({ data: { id: jobId, patch } });
+    },
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["job", jobId] });
       qc.invalidateQueries({ queryKey: ["jobs"] });
-      router.invalidate();
-      toast.success("Serviço atualizado");
+      if (!(res as { queued?: boolean })?.queued) router.invalidate();
+      toast.success(
+        (res as { queued?: boolean })?.queued
+          ? "Salvo offline · será sincronizado"
+          : "Serviço atualizado",
+      );
     },
     onError: (e) => toast.error("Erro", { description: e.message }),
   });
