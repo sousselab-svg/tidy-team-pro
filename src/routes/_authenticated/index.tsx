@@ -8,6 +8,7 @@ import { MobileShell, PageHeader } from "@/components/MobileShell";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { getDashboardStats } from "@/lib/dashboard.functions";
 import { getMyContext } from "@/lib/team-users.functions";
+import { getMyProfile } from "@/lib/profile.functions";
 import { useTranslation } from "react-i18next";
 import { formatCurrency, formatDateTime, formatTime } from "@/lib/format";
 
@@ -25,23 +26,18 @@ const statsQuery = queryOptions({ queryKey: ["dashboard-stats"], queryFn: () => 
 
 function Dashboard() {
   const { t } = useTranslation();
-  const [displayName, setDisplayName] = useState<string>("");
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const u = data.user;
-      const meta = (u?.user_metadata ?? {}) as Record<string, unknown>;
-      const name =
-        (meta.full_name as string) ||
-        (meta.name as string) ||
-        (u?.email ? u.email.split("@")[0] : "");
-      setDisplayName(name);
-    });
-  }, []);
+  const profileFn = useServerFn(getMyProfile);
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: () => profileFn().catch(() => null),
+    staleTime: 60_000,
+    retry: false,
+  });
   const hour = new Date().getHours();
   const greetingKey =
     hour < 12 ? "dashboard.greetingMorning" : hour < 18 ? "dashboard.greetingAfternoon" : "dashboard.greetingEvening";
-  const firstName = displayName.split(" ")[0] ?? "";
-  const headerTitle = firstName ? `${t(greetingKey)}, ${firstName}` : t(greetingKey);
+  const username = profile?.username ?? "";
+  const headerTitle = username ? `${t(greetingKey)}, ${username}` : t(greetingKey);
   const STATUS_TINT: Record<string, string> = {
     scheduled: "var(--muted-foreground)",
     on_way: "var(--warning)",
