@@ -102,7 +102,7 @@ function Dashboard() {
       />
 
       <section className="px-5">
-        <div className="rounded-3xl bg-foreground p-5 text-background shadow-lg">
+        <div className="rounded-3xl bg-primary-dark p-5 text-primary-foreground shadow-lg ring-1 ring-primary/30">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium uppercase tracking-widest opacity-70">{t("dashboard.monthRevenue")}</p>
             <span className="flex items-center gap-1 text-xs font-semibold text-[color:var(--success)]">
