@@ -16,7 +16,7 @@ import {
 } from "@/lib/teams.functions";
 import {
   getMyContext,
-  linkOperator,
+  inviteOperator,
   listOrgMembers,
   unlinkOperator,
 } from "@/lib/team-users.functions";
@@ -104,7 +104,7 @@ function TeamsPage() {
 function StaffTab({ isAdmin }: { isAdmin: boolean }) {
   const listOrg = useServerFn(listOrgMembers);
   const unlinkFn = useServerFn(unlinkOperator);
-  const linkFn = useServerFn(linkOperator);
+  const inviteFn = useServerFn(inviteOperator);
   const list = useServerFn(listTeams);
   const qc = useQueryClient();
   const [linkFor, setLinkFor] = useState<{ id: string; name: string } | null>(null);
@@ -131,12 +131,12 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
   });
 
   const linkMut = useMutation({
-    mutationFn: (input: { email: string; team_member_id: string }) => linkFn({ data: input }),
-    onSuccess: () => {
+    mutationFn: (input: { email: string; team_member_id: string }) => inviteFn({ data: input }),
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["org-members"] });
       qc.invalidateQueries({ queryKey: ["teams"] });
       setLinkFor(null);
-      toast.success("Operador vinculado");
+      toast.success(res?.invited ? "Convite enviado por email" : "Operador vinculado");
     },
     onError: (e: Error) => toast.error("Erro", { description: e.message }),
   });
@@ -213,7 +213,7 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
                     onClick={() => setLinkFor({ id: m.id, name: m.name })}
                     className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
                   >
-                    <Link2 className="size-3" /> Vincular
+                    <Link2 className="size-3" /> Convidar
                   </button>
                 </li>
               ))}
@@ -652,13 +652,13 @@ function LinkOperatorSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur">
       <div className="w-full max-w-[480px] rounded-t-3xl bg-card p-5 pb-10 ring-1 ring-border">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Vincular operador · {memberName}</h2>
+          <h2 className="text-lg font-bold">Convidar operador · {memberName}</h2>
           <button onClick={onClose} className="grid size-8 place-items-center rounded-full bg-secondary">
             <X className="size-4" />
           </button>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Peça para o operador criar uma conta em <strong>/auth</strong> com o email abaixo, depois confirme aqui.
+          Enviamos um convite por email com um link para o operador definir a senha e entrar. Se a conta já existir, vinculamos direto.
         </p>
         <div className="mt-4 space-y-3">
           <Field label="Email da conta do operador" value={email} onChange={setEmail} placeholder="operador@exemplo.com" />
@@ -668,7 +668,7 @@ function LinkOperatorSheet({
             onClick={() => onSubmit(email.trim())}
             className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
           >
-            {busy ? "Vinculando…" : "Vincular"}
+            {busy ? "Enviando…" : "Enviar convite"}
           </button>
         </div>
       </div>
