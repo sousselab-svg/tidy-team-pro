@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { MapPin, Plus, X } from "lucide-react";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { listClients, type ClientRow } from "@/lib/clients.functions";
 import {
   createJob as createJobFn,
@@ -91,13 +92,16 @@ function AgendaPage() {
         title={capitalize(dayLabel)}
         subtitle={t("agenda.jobsCount", { count: dayJobs.length })}
         right={
-          <button
-            onClick={() => setOpen(true)}
-            className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow"
-            aria-label={t("agenda.newJob")}
-          >
-            <Plus className="size-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationsBell />
+            <button
+              onClick={() => setOpen(true)}
+              className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow"
+              aria-label={t("agenda.newJob")}
+            >
+              <Plus className="size-5" />
+            </button>
+          </div>
         }
       />
 
