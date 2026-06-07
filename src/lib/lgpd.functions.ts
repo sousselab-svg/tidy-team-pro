@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getRequest } from "@tanstack/react-start/server";
 
 export type ConsentPreferences = {
   analytics: boolean;
@@ -26,12 +27,48 @@ export type DataSubjectRequest = {
   completed_at: string | null;
 };
 
-const CURRENT_POLICY_VERSION = "1.0.0";
+async function getCurrentPolicyVersion(
+  supabase: { from: (t: string) => any },
+): Promise<string> {
+  const { data } = await supabase
+    .from("legal_documents")
+    .select("version")
+    .eq("doc_type", "privacy")
+    .eq("is_current", true)
+    .maybeSingle();
+  return (data?.version as string | undefined) ?? "1.0.0";
+}
+
+async function checkRateLimit(
+  supabase: { from: (t: string) => any },
+  userId: string,
+  action: string,
+  windowMinutes: number,
+  max: number,
+) {
+  const since = new Date(Date.now() - windowMinutes * 60_000).toISOString();
+  const { count, error } = await supabase
+    .from("rate_limit_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("action", action)
+    .gte("created_at", since);
+  if (error) throw error;
+  if ((count ?? 0) >= max) {
+    throw new Error(
+      `Limite atingido. Tente novamente em até ${windowMinutes} minutos.`,
+    );
+  }
+  await supabase
+    .from("rate_limit_events")
+    .insert({ user_id: userId, action });
+}
 
 export const getMyConsent = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ConsentPreferences> => {
     const { supabase, userId } = context;
+    const policyVersion = await getCurrentPolicyVersion(supabase);
     const { data, error } = await supabase
       .from("consent_preferences")
       .select("analytics, marketing, functional, policy_version, updated_at")
@@ -43,7 +80,7 @@ export const getMyConsent = createServerFn({ method: "GET" })
         analytics: false,
         marketing: false,
         functional: true,
-        policy_version: CURRENT_POLICY_VERSION,
+        policy_version: policyVersion,
         updated_at: null,
       }
     );
@@ -65,6 +102,7 @@ export const updateMyConsent = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const policyVersion = await getCurrentPolicyVersion(supabase);
     const { error } = await supabase
       .from("consent_preferences")
       .upsert(
@@ -73,7 +111,7 @@ export const updateMyConsent = createServerFn({ method: "POST" })
           analytics: data.analytics,
           marketing: data.marketing,
           functional: data.functional,
-          policy_version: CURRENT_POLICY_VERSION,
+          policy_version: policyVersion,
         },
         { onConflict: "user_id" },
       );
@@ -118,14 +156,44 @@ export const createDataRequest = createServerFn({ method: "POST" })
     if (existing) {
       throw new Error("Já existe uma solicitação em andamento deste tipo.");
     }
-    const { error } = await supabase.from("data_subject_requests").insert({
-      user_id: userId,
-      kind: data.kind,
-      notes: data.notes?.trim() || null,
-      status: "pending",
-    });
+    await checkRateLimit(supabase, userId, `dsr:${data.kind}`, 60, 3);
+
+    const { data: inserted, error } = await supabase
+      .from("data_subject_requests")
+      .insert({
+        user_id: userId,
+        kind: data.kind,
+        notes: data.notes?.trim() || null,
+        status: data.kind === "deletion" ? "pending" : "pending",
+      })
+      .select("id")
+      .single();
     if (error) throw error;
-    return { ok: true };
+
+    // Deletion requires double opt-in via email/link
+    if (data.kind === "deletion") {
+      const { data: token, error: tErr } = await supabase
+        .from("deletion_confirmations")
+        .insert({ user_id: userId, request_id: inserted.id })
+        .select("token, expires_at")
+        .single();
+      if (tErr) throw tErr;
+
+      const origin =
+        getRequest()?.headers.get("origin") ??
+        getRequest()?.headers.get("referer") ??
+        "";
+      const confirmUrl = origin
+        ? `${origin.replace(/\/$/, "")}/confirmar-exclusao/${token.token}`
+        : `/confirmar-exclusao/${token.token}`;
+      return {
+        ok: true,
+        requiresConfirmation: true,
+        confirmUrl,
+        expiresAt: token.expires_at,
+      };
+    }
+    return { ok: true, requiresConfirmation: false };
   });
 
 export const cancelDataRequest = createServerFn({ method: "POST" })
@@ -150,6 +218,7 @@ export const exportMyDataNow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    await checkRateLimit(supabase, userId, "export", 10, 1);
     const [profile, consent, acceptances, clients, jobs, invoices, requests] =
       await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
@@ -180,4 +249,40 @@ export const exportMyDataNow = createServerFn({ method: "POST" })
       notes: "Auto export via app",
     });
     return payload;
+  });
+
+export const confirmDeletionRequest = createServerFn({ method: "POST" })
+  .inputValidator((data: { token: string }) => {
+    if (!data?.token || typeof data.token !== "string") {
+      throw new Error("invalid_token");
+    }
+    return data;
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { data: row, error } = await supabaseAdmin
+      .from("deletion_confirmations")
+      .select("id, user_id, request_id, expires_at, confirmed_at")
+      .eq("token", data.token)
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) throw new Error("Token inválido.");
+    if (row.confirmed_at) {
+      return { ok: true, alreadyConfirmed: true };
+    }
+    if (new Date(row.expires_at).getTime() < Date.now()) {
+      throw new Error("Token expirado. Solicite a exclusão novamente.");
+    }
+    await supabaseAdmin
+      .from("deletion_confirmations")
+      .update({ confirmed_at: new Date().toISOString() })
+      .eq("id", row.id);
+    await supabaseAdmin
+      .from("data_subject_requests")
+      .update({ status: "processing" })
+      .eq("id", row.request_id)
+      .eq("user_id", row.user_id);
+    return { ok: true, alreadyConfirmed: false };
   });

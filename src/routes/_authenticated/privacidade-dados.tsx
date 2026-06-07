@@ -63,9 +63,21 @@ function PrivacyDataPage() {
 
   const reqMut = useMutation({
     mutationFn: (kind: DSRKind) => createReq({ data: { kind } }),
-    onSuccess: () => {
+    onSuccess: (res: any) => {
       qc.invalidateQueries({ queryKey: ["lgpd-reqs"] });
-      toast.success("Solicitação registrada");
+      if (res?.requiresConfirmation && res.confirmUrl) {
+        toast.success("Confirme em seu e-mail/link", {
+          description:
+            "Enviamos um link de confirmação. Você pode confirmar agora abrindo o link.",
+          action: {
+            label: "Abrir link",
+            onClick: () => window.open(res.confirmUrl, "_blank"),
+          },
+          duration: 15000,
+        });
+      } else {
+        toast.success("Solicitação registrada");
+      }
     },
     onError: (e) => toast.error("Erro", { description: (e as Error).message }),
   });

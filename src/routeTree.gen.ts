@@ -19,6 +19,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as PortalTokenRouteImport } from './routes/portal.$token'
 import { Route as NpsTokenRouteImport } from './routes/nps.$token'
+import { Route as ConfirmarExclusaoTokenRouteImport } from './routes/confirmar-exclusao.$token'
 import { Route as AuthenticatedServicosRouteImport } from './routes/_authenticated/servicos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedRecorrenciaRouteImport } from './routes/_authenticated/recorrencia'
@@ -88,6 +89,11 @@ const PortalTokenRoute = PortalTokenRouteImport.update({
 const NpsTokenRoute = NpsTokenRouteImport.update({
   id: '/nps/$token',
   path: '/nps/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmarExclusaoTokenRoute = ConfirmarExclusaoTokenRouteImport.update({
+  id: '/confirmar-exclusao/$token',
+  path: '/confirmar-exclusao/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedServicosRoute = AuthenticatedServicosRouteImport.update({
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
+  '/confirmar-exclusao/$token': typeof ConfirmarExclusaoTokenRoute
   '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/servicos': typeof AuthenticatedServicosRoute
+  '/confirmar-exclusao/$token': typeof ConfirmarExclusaoTokenRoute
   '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/': typeof AuthenticatedIndexRoute
@@ -296,6 +304,7 @@ export interface FileRoutesById {
   '/_authenticated/recorrencia': typeof AuthenticatedRecorrenciaRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/servicos': typeof AuthenticatedServicosRoute
+  '/confirmar-exclusao/$token': typeof ConfirmarExclusaoTokenRoute
   '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -331,6 +340,7 @@ export interface FileRouteTypes {
     | '/recorrencia'
     | '/relatorios'
     | '/servicos'
+    | '/confirmar-exclusao/$token'
     | '/nps/$token'
     | '/portal/$token'
     | '/agenda/$jobId'
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/recorrencia'
     | '/relatorios'
     | '/servicos'
+    | '/confirmar-exclusao/$token'
     | '/nps/$token'
     | '/portal/$token'
     | '/'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/_authenticated/recorrencia'
     | '/_authenticated/relatorios'
     | '/_authenticated/servicos'
+    | '/confirmar-exclusao/$token'
     | '/nps/$token'
     | '/portal/$token'
     | '/_authenticated/'
@@ -411,6 +423,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermosRoute: typeof TermosRoute
+  ConfirmarExclusaoTokenRoute: typeof ConfirmarExclusaoTokenRoute
   NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
   ApiPublicHooksGrowthCronRoute: typeof ApiPublicHooksGrowthCronRoute
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       path: '/nps/$token'
       fullPath: '/nps/$token'
       preLoaderRoute: typeof NpsTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirmar-exclusao/$token': {
+      id: '/confirmar-exclusao/$token'
+      path: '/confirmar-exclusao/$token'
+      fullPath: '/confirmar-exclusao/$token'
+      preLoaderRoute: typeof ConfirmarExclusaoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/servicos': {
@@ -715,6 +735,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermosRoute: TermosRoute,
+  ConfirmarExclusaoTokenRoute: ConfirmarExclusaoTokenRoute,
   NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
   ApiPublicHooksGrowthCronRoute: ApiPublicHooksGrowthCronRoute,
@@ -722,3 +743,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
