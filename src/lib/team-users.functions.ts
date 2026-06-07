@@ -182,6 +182,15 @@ export const linkOperator = createServerFn({ method: "POST" })
       .eq("id", data.team_member_id);
     if (linkErr) throw new Error(linkErr.message);
 
+    await supabaseAdmin.from("notifications").insert({
+      owner_id: orgOwnerId,
+      user_id: foundUserId,
+      kind: "operator_linked",
+      title: "Acesso de operador concedido",
+      body: "Sua conta foi vinculada como operador. Faça login para começar.",
+      link: "/agenda",
+    });
+
     return { ok: true };
   });
 
@@ -213,6 +222,15 @@ export const unlinkOperator = createServerFn({ method: "POST" })
       .delete()
       .eq("user_id", data.user_id);
     if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("notifications").insert({
+      owner_id: orgOwnerId,
+      user_id: data.user_id,
+      kind: "operator_unlinked",
+      title: "Acesso de operador removido",
+      body: "Seu acesso como operador foi revogado pelo administrador.",
+      link: null,
+    });
 
     return { ok: true };
   });
