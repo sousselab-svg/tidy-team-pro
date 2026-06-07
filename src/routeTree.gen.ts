@@ -25,6 +25,7 @@ import { Route as AuthenticatedPermissoesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedOrcamentosRouteImport } from './routes/_authenticated/orcamentos'
 import { Route as AuthenticatedOperacaoRouteImport } from './routes/_authenticated/operacao'
 import { Route as AuthenticatedNpsRouteImport } from './routes/_authenticated/nps'
+import { Route as AuthenticatedNotificacoesRouteImport } from './routes/_authenticated/notificacoes'
 import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
 import { Route as AuthenticatedInteligenciaRouteImport } from './routes/_authenticated/inteligencia'
 import { Route as AuthenticatedIndicacoesRouteImport } from './routes/_authenticated/indicacoes'
@@ -117,6 +118,12 @@ const AuthenticatedNpsRoute = AuthenticatedNpsRouteImport.update({
   path: '/nps',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificacoesRoute =
+  AuthenticatedNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLembretesRoute = AuthenticatedLembretesRouteImport.update({
   id: '/lembretes',
   path: '/lembretes',
@@ -193,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/nps': typeof AuthenticatedNpsRoute
   '/operacao': typeof AuthenticatedOperacaoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
@@ -220,6 +228,7 @@ export interface FileRoutesByTo {
   '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/nps': typeof AuthenticatedNpsRoute
   '/operacao': typeof AuthenticatedOperacaoRoute
   '/orcamentos': typeof AuthenticatedOrcamentosRoute
@@ -250,6 +259,7 @@ export interface FileRoutesById {
   '/_authenticated/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
   '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
+  '/_authenticated/notificacoes': typeof AuthenticatedNotificacoesRoute
   '/_authenticated/nps': typeof AuthenticatedNpsRoute
   '/_authenticated/operacao': typeof AuthenticatedOperacaoRoute
   '/_authenticated/orcamentos': typeof AuthenticatedOrcamentosRoute
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/indicacoes'
     | '/inteligencia'
     | '/lembretes'
+    | '/notificacoes'
     | '/nps'
     | '/operacao'
     | '/orcamentos'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/indicacoes'
     | '/inteligencia'
     | '/lembretes'
+    | '/notificacoes'
     | '/nps'
     | '/operacao'
     | '/orcamentos'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/_authenticated/indicacoes'
     | '/_authenticated/inteligencia'
     | '/_authenticated/lembretes'
+    | '/_authenticated/notificacoes'
     | '/_authenticated/nps'
     | '/_authenticated/operacao'
     | '/_authenticated/orcamentos'
@@ -478,6 +491,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notificacoes': {
+      id: '/_authenticated/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof AuthenticatedNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/lembretes': {
       id: '/_authenticated/lembretes'
       path: '/lembretes'
@@ -589,6 +609,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndicacoesRoute: typeof AuthenticatedIndicacoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
   AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
+  AuthenticatedNotificacoesRoute: typeof AuthenticatedNotificacoesRoute
   AuthenticatedNpsRoute: typeof AuthenticatedNpsRoute
   AuthenticatedOperacaoRoute: typeof AuthenticatedOperacaoRoute
   AuthenticatedOrcamentosRoute: typeof AuthenticatedOrcamentosRoute
@@ -609,6 +630,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndicacoesRoute: AuthenticatedIndicacoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,
   AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
+  AuthenticatedNotificacoesRoute: AuthenticatedNotificacoesRoute,
   AuthenticatedNpsRoute: AuthenticatedNpsRoute,
   AuthenticatedOperacaoRoute: AuthenticatedOperacaoRoute,
   AuthenticatedOrcamentosRoute: AuthenticatedOrcamentosRoute,
@@ -636,13 +658,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
