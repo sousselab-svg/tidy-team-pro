@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import "@/lib/i18n";
 import { Toaster } from "sonner";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 function NotFoundComponent() {
   const { t } = useTranslation();
@@ -138,6 +139,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-center" richColors />
+      <CookieConsentBanner />
     </QueryClientProvider>
   );
 }
