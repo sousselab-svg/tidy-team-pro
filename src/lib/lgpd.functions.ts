@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getRequest } from "@tanstack/react-start/server";
 
 export type ConsentPreferences = {
   analytics: boolean;
@@ -26,12 +27,48 @@ export type DataSubjectRequest = {
   completed_at: string | null;
 };
 
-const CURRENT_POLICY_VERSION = "1.0.0";
+async function getCurrentPolicyVersion(
+  supabase: { from: (t: string) => any },
+): Promise<string> {
+  const { data } = await supabase
+    .from("legal_documents")
+    .select("version")
+    .eq("doc_type", "privacy")
+    .eq("is_current", true)
+    .maybeSingle();
+  return (data?.version as string | undefined) ?? "1.0.0";
+}
+
+async function checkRateLimit(
+  supabase: { from: (t: string) => any },
+  userId: string,
+  action: string,
+  windowMinutes: number,
+  max: number,
+) {
+  const since = new Date(Date.now() - windowMinutes * 60_000).toISOString();
+  const { count, error } = await supabase
+    .from("rate_limit_events")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("action", action)
+    .gte("created_at", since);
+  if (error) throw error;
+  if ((count ?? 0) >= max) {
+    throw new Error(
+      `Limite atingido. Tente novamente em até ${windowMinutes} minutos.`,
+    );
+  }
+  await supabase
+    .from("rate_limit_events")
+    .insert({ user_id: userId, action });
+}
 
 export const getMyConsent = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ConsentPreferences> => {
     const { supabase, userId } = context;
+    const policyVersion = await getCurrentPolicyVersion(supabase);
     const { data, error } = await supabase
       .from("consent_preferences")
       .select("analytics, marketing, functional, policy_version, updated_at")
@@ -43,7 +80,7 @@ export const getMyConsent = createServerFn({ method: "GET" })
         analytics: false,
         marketing: false,
         functional: true,
-        policy_version: CURRENT_POLICY_VERSION,
+        policy_version: policyVersion,
         updated_at: null,
       }
     );
@@ -65,6 +102,7 @@ export const updateMyConsent = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const policyVersion = await getCurrentPolicyVersion(supabase);
     const { error } = await supabase
       .from("consent_preferences")
       .upsert(
@@ -73,7 +111,7 @@ export const updateMyConsent = createServerFn({ method: "POST" })
           analytics: data.analytics,
           marketing: data.marketing,
           functional: data.functional,
-          policy_version: CURRENT_POLICY_VERSION,
+          policy_version: policyVersion,
         },
         { onConflict: "user_id" },
       );
