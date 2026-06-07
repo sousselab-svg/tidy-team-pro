@@ -234,3 +234,113 @@ export const unlinkOperator = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+/**
+ * Admin: invite a new operator by email.
+ * - If the email already has an account, links it as operator (same as linkOperator).
+ * - Otherwise creates the auth user and sends the Supabase invite email so the
+ *   operator can set their own password.
+ */
+export const inviteOperator = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z
+      .object({
+        email: z.string().email().max(255),
+        team_member_id: z.string().uuid(),
+      })
+      .parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: me } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (me && me.role !== "admin") throw new Error("Apenas admin pode convidar operadores");
+    const orgOwnerId = context.userId;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Verify team member belongs to this org and isn't linked yet.
+    const { data: tm, error: tmErr } = await supabaseAdmin
+      .from("team_members")
+      .select("id, owner_id, user_id")
+      .eq("id", data.team_member_id)
+      .maybeSingle();
+    if (tmErr) throw new Error(tmErr.message);
+    if (!tm || tm.owner_id !== orgOwnerId)
+      throw new Error("Membro de equipe não encontrado");
+    if (tm.user_id) throw new Error("Esse membro já está vinculado a uma conta");
+
+    const normalized = data.email.trim().toLowerCase();
+
+    // Look up existing user by email (paginated).
+    let foundUserId: string | null = null;
+    for (let page = 1; page <= 10; page++) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage: 200,
+      });
+      if (error) throw new Error(error.message);
+      const hit = list.users.find((u) => (u.email ?? "").toLowerCase() === normalized);
+      if (hit) {
+        foundUserId = hit.id;
+        break;
+      }
+      if (list.users.length < 200) break;
+    }
+
+    let invited = false;
+    if (!foundUserId) {
+      // Send invite email — Supabase creates the user and emails a magic link
+      // that drops the operator at /reset-password to set their password.
+      const redirectTo =
+        (process.env.PUBLIC_SITE_URL || process.env.SUPABASE_URL || "") + "/reset-password";
+      const { data: invited2, error: invErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+        normalized,
+        { redirectTo: redirectTo || undefined },
+      );
+      if (invErr) throw new Error(invErr.message);
+      foundUserId = invited2.user?.id ?? null;
+      invited = true;
+      if (!foundUserId) throw new Error("Não foi possível criar a conta do operador");
+    }
+
+    if (foundUserId === orgOwnerId) throw new Error("Você já é o admin desta conta");
+
+    const { data: existingRole } = await supabaseAdmin
+      .from("user_roles")
+      .select("org_owner_id")
+      .eq("user_id", foundUserId)
+      .maybeSingle();
+    if (existingRole && existingRole.org_owner_id !== orgOwnerId)
+      throw new Error("Esta conta já pertence a outra empresa");
+
+    const { error: upErr } = await supabaseAdmin
+      .from("user_roles")
+      .upsert(
+        { user_id: foundUserId, org_owner_id: orgOwnerId, role: "operator" },
+        { onConflict: "user_id" },
+      );
+    if (upErr) throw new Error(upErr.message);
+
+    const { error: linkErr } = await supabaseAdmin
+      .from("team_members")
+      .update({ user_id: foundUserId })
+      .eq("id", data.team_member_id);
+    if (linkErr) throw new Error(linkErr.message);
+
+    await supabaseAdmin.from("notifications").insert({
+      owner_id: orgOwnerId,
+      user_id: foundUserId,
+      kind: "operator_linked",
+      title: "Acesso de operador concedido",
+      body: invited
+        ? "Convite enviado por email. O operador define a senha pelo link."
+        : "Conta vinculada como operador. Faça login para começar.",
+      link: "/agenda",
+    });
+
+    return { ok: true, invited };
+  });
