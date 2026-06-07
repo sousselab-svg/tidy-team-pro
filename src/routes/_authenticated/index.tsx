@@ -36,7 +36,7 @@ function Dashboard() {
   const hour = new Date().getHours();
   const greetingKey =
     hour < 12 ? "dashboard.greetingMorning" : hour < 18 ? "dashboard.greetingAfternoon" : "dashboard.greetingEvening";
-  const username = profile?.username ?? "";
+  const username = profile?.profile?.username ?? "";
   const headerTitle = username ? `${t(greetingKey)}, ${username}` : t(greetingKey);
   const STATUS_TINT: Record<string, string> = {
     scheduled: "var(--muted-foreground)",
