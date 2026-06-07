@@ -213,7 +213,7 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
                     onClick={() => setLinkFor({ id: m.id, name: m.name })}
                     className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground"
                   >
-                    <Link2 className="size-3" /> Vincular
+                    <Link2 className="size-3" /> Convidar
                   </button>
                 </li>
               ))}
@@ -652,7 +652,7 @@ function LinkOperatorSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur">
       <div className="w-full max-w-[480px] rounded-t-3xl bg-card p-5 pb-10 ring-1 ring-border">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Vincular operador · {memberName}</h2>
+          <h2 className="text-lg font-bold">Convidar operador · {memberName}</h2>
           <button onClick={onClose} className="grid size-8 place-items-center rounded-full bg-secondary">
             <X className="size-4" />
           </button>
