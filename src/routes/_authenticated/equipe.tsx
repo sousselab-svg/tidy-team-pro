@@ -16,7 +16,7 @@ import {
 } from "@/lib/teams.functions";
 import {
   getMyContext,
-  linkOperator,
+  inviteOperator,
   listOrgMembers,
   unlinkOperator,
 } from "@/lib/team-users.functions";
@@ -104,7 +104,7 @@ function TeamsPage() {
 function StaffTab({ isAdmin }: { isAdmin: boolean }) {
   const listOrg = useServerFn(listOrgMembers);
   const unlinkFn = useServerFn(unlinkOperator);
-  const linkFn = useServerFn(linkOperator);
+  const inviteFn = useServerFn(inviteOperator);
   const list = useServerFn(listTeams);
   const qc = useQueryClient();
   const [linkFor, setLinkFor] = useState<{ id: string; name: string } | null>(null);
@@ -131,12 +131,12 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
   });
 
   const linkMut = useMutation({
-    mutationFn: (input: { email: string; team_member_id: string }) => linkFn({ data: input }),
-    onSuccess: () => {
+    mutationFn: (input: { email: string; team_member_id: string }) => inviteFn({ data: input }),
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["org-members"] });
       qc.invalidateQueries({ queryKey: ["teams"] });
       setLinkFor(null);
-      toast.success("Operador vinculado");
+      toast.success(res?.invited ? "Convite enviado por email" : "Operador vinculado");
     },
     onError: (e: Error) => toast.error("Erro", { description: e.message }),
   });
