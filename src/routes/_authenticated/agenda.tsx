@@ -16,6 +16,7 @@ import { listServices, type ServiceItem } from "@/lib/services.functions";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { formatCurrency, formatLongDate, formatTime, formatWeekdayShort } from "@/lib/format";
+import { readCache, writeCache, useOnlineStatus } from "@/lib/offline";
 
 export const Route = createFileRoute("/_authenticated/agenda")({
   head: () => ({
@@ -41,6 +42,7 @@ function AgendaPage() {
   const create = useServerFn(createJobFn);
   const listC = useServerFn(listClients);
   const qc = useQueryClient();
+  const online = useOnlineStatus();
   const [open, setOpen] = useState(false);
   const [day, setDay] = useState(() => {
     const d = new Date();
@@ -48,7 +50,18 @@ function AgendaPage() {
     return d;
   });
 
-  const jobsQ = useQuery({ queryKey: ["jobs"], queryFn: () => list() });
+  const jobsQ = useQuery({
+    queryKey: ["jobs"],
+    queryFn: async () => {
+      const data = await list();
+      writeCache("jobs", data);
+      return data;
+    },
+    initialData: () => readCache<JobRow[]>("jobs"),
+    // When offline, don't keep retrying in the background
+    retry: online,
+    networkMode: "always",
+  });
   const clientsQ = useQuery({ queryKey: ["clients"], queryFn: () => listC() });
   const listS = useServerFn(listServices);
   const servicesQ = useQuery({
