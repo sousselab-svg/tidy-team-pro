@@ -154,6 +154,18 @@ function AuthPage() {
         >
           <GoogleIcon /> {t("auth.continueGoogle")}
         </button>
+
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground">
+          Ao continuar, você concorda com nossos{" "}
+          <Link to="/termos" className="font-semibold text-foreground hover:text-primary">
+            Termos de Uso
+          </Link>{" "}
+          e{" "}
+          <Link to="/privacidade" className="font-semibold text-foreground hover:text-primary">
+            Política de Privacidade
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
