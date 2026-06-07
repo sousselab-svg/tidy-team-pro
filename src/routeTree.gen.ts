@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -41,6 +42,11 @@ import { Route as ApiPublicHooksGrowthCronRouteImport } from './routes/api/publi
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/dispatch': typeof DispatchRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dispatch'
     | '/forgot-password'
+    | '/privacidade'
     | '/reset-password'
     | '/agenda'
     | '/clientes'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dispatch'
     | '/forgot-password'
+    | '/privacidade'
     | '/reset-password'
     | '/agenda'
     | '/clientes'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dispatch'
     | '/forgot-password'
+    | '/privacidade'
     | '/reset-password'
     | '/_authenticated/agenda'
     | '/_authenticated/clientes'
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DispatchRoute: typeof DispatchRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -650,6 +670,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DispatchRoute: DispatchRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
@@ -658,3 +679,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
