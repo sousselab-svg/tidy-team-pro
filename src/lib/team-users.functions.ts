@@ -344,3 +344,60 @@ export const inviteOperator = createServerFn({ method: "POST" })
 
     return { ok: true, invited };
   });
+
+/** Admin: resend the invite email to an operator who hasn't confirmed yet. */
+export const resendOperatorInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ user_id: z.string().uuid() }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: me } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (me && me.role !== "admin") throw new Error("Apenas admin pode reenviar convites");
+    const orgOwnerId = context.userId;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Confirm operator belongs to this org.
+    const { data: role } = await supabaseAdmin
+      .from("user_roles")
+      .select("org_owner_id, role")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (!role || role.org_owner_id !== orgOwnerId)
+      throw new Error("Operador não encontrado nesta empresa");
+    if (role.role !== "operator")
+      throw new Error("Apenas operadores podem ser reconvidados");
+
+    const { data: userRes, error: getErr } = await supabaseAdmin.auth.admin.getUserById(
+      data.user_id,
+    );
+    if (getErr) throw new Error(getErr.message);
+    const email = userRes.user?.email;
+    if (!email) throw new Error("Operador sem email cadastrado");
+
+    const redirectTo =
+      (process.env.PUBLIC_SITE_URL || process.env.SUPABASE_URL || "") + "/reset-password";
+
+    // If already confirmed, send a password-recovery link instead of a new invite.
+    const alreadyConfirmed = !!userRes.user?.email_confirmed_at;
+    if (alreadyConfirmed) {
+      const { error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: { redirectTo: redirectTo || undefined },
+      });
+      if (linkErr) throw new Error(linkErr.message);
+      return { ok: true, kind: "recovery" as const };
+    }
+
+    const { error: invErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: redirectTo || undefined,
+    });
+    if (invErr) throw new Error(invErr.message);
+    return { ok: true, kind: "invite" as const };
+  });
