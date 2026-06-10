@@ -152,3 +152,28 @@
     color: var(--color-foreground);
   }
 }
+
+/* ===== Animated splash keyframes ===== */
+@keyframes splash-pop {
+  0% { transform: scale(0.4) rotate(-18deg); opacity: 0; filter: blur(8px); }
+  60% { transform: scale(1.08) rotate(4deg); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes splash-ring {
+  to { transform: rotate(360deg); }
+}
+@keyframes splash-text {
+  0% { transform: translateY(120%); opacity: 0; letter-spacing: 0.05em; }
+  100% { transform: translateY(0); opacity: 1; letter-spacing: 0.25em; }
+}
+@keyframes splash-spark {
+  0%, 100% { transform: rotate(45deg) scale(0); opacity: 0; }
+  40% { transform: rotate(45deg) scale(1.4); opacity: 1; }
+  70% { transform: rotate(45deg) scale(1); opacity: 0.7; }
+}
+.animate-splash-pop { animation: splash-pop 900ms cubic-bezier(.2,.9,.25,1.2) both; }
+.animate-splash-ring { animation: splash-ring 2.6s linear infinite; }
+.animate-splash-text { display: inline-block; animation: splash-text 700ms 500ms cubic-bezier(.2,.8,.2,1) both; }
+.animate-splash-spark-1 { animation: splash-spark 1.4s 400ms ease-out infinite; }
+.animate-splash-spark-2 { animation: splash-spark 1.6s 700ms ease-out infinite; }
+.animate-splash-spark-3 { animation: splash-spark 1.8s 1000ms ease-out infinite; }
