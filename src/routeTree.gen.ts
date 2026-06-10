@@ -39,7 +39,7 @@ import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authen
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authenticated/equipe_.rastrear'
-import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
+import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda_.$jobId'
 import { Route as ApiPublicHooksGrowthCronRouteImport } from './routes/api/public/hooks/growth-cron'
 
 const TermosRoute = TermosRouteImport.update({
@@ -200,9 +200,9 @@ const AuthenticatedEquipeRastrearRoute =
   } as any)
 const AuthenticatedAgendaJobIdRoute =
   AuthenticatedAgendaJobIdRouteImport.update({
-    id: '/$jobId',
-    path: '/$jobId',
-    getParentRoute: () => AuthenticatedAgendaRoute,
+    id: '/agenda_/$jobId',
+    path: '/agenda/$jobId',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicHooksGrowthCronRoute =
   ApiPublicHooksGrowthCronRouteImport.update({
@@ -219,7 +219,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
-  '/agenda': typeof AuthenticatedAgendaRouteWithChildren
+  '/agenda': typeof AuthenticatedAgendaRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/equipe': typeof AuthenticatedEquipeRoute
@@ -251,7 +251,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
-  '/agenda': typeof AuthenticatedAgendaRouteWithChildren
+  '/agenda': typeof AuthenticatedAgendaRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/equipe': typeof AuthenticatedEquipeRoute
@@ -286,7 +286,7 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
-  '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
+  '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
@@ -308,7 +308,7 @@ export interface FileRoutesById {
   '/nps/$token': typeof NpsTokenRoute
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
+  '/_authenticated/agenda_/$jobId': typeof AuthenticatedAgendaJobIdRoute
   '/_authenticated/equipe_/rastrear': typeof AuthenticatedEquipeRastrearRoute
   '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
@@ -410,7 +410,7 @@ export interface FileRouteTypes {
     | '/nps/$token'
     | '/portal/$token'
     | '/_authenticated/'
-    | '/_authenticated/agenda/$jobId'
+    | '/_authenticated/agenda_/$jobId'
     | '/_authenticated/equipe_/rastrear'
     | '/api/public/hooks/growth-cron'
   fileRoutesById: FileRoutesById
@@ -641,12 +641,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEquipeRastrearRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/agenda/$jobId': {
-      id: '/_authenticated/agenda/$jobId'
-      path: '/$jobId'
+    '/_authenticated/agenda_/$jobId': {
+      id: '/_authenticated/agenda_/$jobId'
+      path: '/agenda/$jobId'
       fullPath: '/agenda/$jobId'
       preLoaderRoute: typeof AuthenticatedAgendaJobIdRouteImport
-      parentRoute: typeof AuthenticatedAgendaRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/hooks/growth-cron': {
       id: '/api/public/hooks/growth-cron'
@@ -658,19 +658,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAgendaRouteChildren {
-  AuthenticatedAgendaJobIdRoute: typeof AuthenticatedAgendaJobIdRoute
-}
-
-const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
-  AuthenticatedAgendaJobIdRoute: AuthenticatedAgendaJobIdRoute,
-}
-
-const AuthenticatedAgendaRouteWithChildren =
-  AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
-
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
+  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
@@ -689,11 +678,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedAgendaJobIdRoute: typeof AuthenticatedAgendaJobIdRoute
   AuthenticatedEquipeRastrearRoute: typeof AuthenticatedEquipeRastrearRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
+  AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
@@ -712,6 +702,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedAgendaJobIdRoute: AuthenticatedAgendaJobIdRoute,
   AuthenticatedEquipeRastrearRoute: AuthenticatedEquipeRastrearRoute,
 }
 
