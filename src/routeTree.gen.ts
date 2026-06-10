@@ -38,7 +38,7 @@ import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
-import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authenticated/equipe.rastrear'
+import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authenticated/equipe_.rastrear'
 import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda.$jobId'
 import { Route as ApiPublicHooksGrowthCronRouteImport } from './routes/api/public/hooks/growth-cron'
 
@@ -194,9 +194,9 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
 } as any)
 const AuthenticatedEquipeRastrearRoute =
   AuthenticatedEquipeRastrearRouteImport.update({
-    id: '/rastrear',
-    path: '/rastrear',
-    getParentRoute: () => AuthenticatedEquipeRoute,
+    id: '/equipe_/rastrear',
+    path: '/equipe/rastrear',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAgendaJobIdRoute =
   AuthenticatedAgendaJobIdRouteImport.update({
@@ -222,7 +222,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/equipe': typeof AuthenticatedEquipeRouteWithChildren
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -254,7 +254,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/equipe': typeof AuthenticatedEquipeRouteWithChildren
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/faturamento': typeof AuthenticatedFaturamentoRoute
   '/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -289,7 +289,7 @@ export interface FileRoutesById {
   '/_authenticated/agenda': typeof AuthenticatedAgendaRouteWithChildren
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
-  '/_authenticated/equipe': typeof AuthenticatedEquipeRouteWithChildren
+  '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/faturamento': typeof AuthenticatedFaturamentoRoute
   '/_authenticated/indicacoes': typeof AuthenticatedIndicacoesRoute
   '/_authenticated/inteligencia': typeof AuthenticatedInteligenciaRoute
@@ -309,7 +309,7 @@ export interface FileRoutesById {
   '/portal/$token': typeof PortalTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/agenda/$jobId': typeof AuthenticatedAgendaJobIdRoute
-  '/_authenticated/equipe/rastrear': typeof AuthenticatedEquipeRastrearRoute
+  '/_authenticated/equipe_/rastrear': typeof AuthenticatedEquipeRastrearRoute
   '/api/public/hooks/growth-cron': typeof ApiPublicHooksGrowthCronRoute
 }
 export interface FileRouteTypes {
@@ -411,7 +411,7 @@ export interface FileRouteTypes {
     | '/portal/$token'
     | '/_authenticated/'
     | '/_authenticated/agenda/$jobId'
-    | '/_authenticated/equipe/rastrear'
+    | '/_authenticated/equipe_/rastrear'
     | '/api/public/hooks/growth-cron'
   fileRoutesById: FileRoutesById
 }
@@ -634,12 +634,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/equipe/rastrear': {
-      id: '/_authenticated/equipe/rastrear'
-      path: '/rastrear'
+    '/_authenticated/equipe_/rastrear': {
+      id: '/_authenticated/equipe_/rastrear'
+      path: '/equipe/rastrear'
       fullPath: '/equipe/rastrear'
       preLoaderRoute: typeof AuthenticatedEquipeRastrearRouteImport
-      parentRoute: typeof AuthenticatedEquipeRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/agenda/$jobId': {
       id: '/_authenticated/agenda/$jobId'
@@ -669,22 +669,11 @@ const AuthenticatedAgendaRouteChildren: AuthenticatedAgendaRouteChildren = {
 const AuthenticatedAgendaRouteWithChildren =
   AuthenticatedAgendaRoute._addFileChildren(AuthenticatedAgendaRouteChildren)
 
-interface AuthenticatedEquipeRouteChildren {
-  AuthenticatedEquipeRastrearRoute: typeof AuthenticatedEquipeRastrearRoute
-}
-
-const AuthenticatedEquipeRouteChildren: AuthenticatedEquipeRouteChildren = {
-  AuthenticatedEquipeRastrearRoute: AuthenticatedEquipeRastrearRoute,
-}
-
-const AuthenticatedEquipeRouteWithChildren =
-  AuthenticatedEquipeRoute._addFileChildren(AuthenticatedEquipeRouteChildren)
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRouteWithChildren
   AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
-  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRouteWithChildren
+  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedFaturamentoRoute: typeof AuthenticatedFaturamentoRoute
   AuthenticatedIndicacoesRoute: typeof AuthenticatedIndicacoesRoute
   AuthenticatedInteligenciaRoute: typeof AuthenticatedInteligenciaRoute
@@ -700,13 +689,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedServicosRoute: typeof AuthenticatedServicosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedEquipeRastrearRoute: typeof AuthenticatedEquipeRastrearRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRouteWithChildren,
   AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
-  AuthenticatedEquipeRoute: AuthenticatedEquipeRouteWithChildren,
+  AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedFaturamentoRoute: AuthenticatedFaturamentoRoute,
   AuthenticatedIndicacoesRoute: AuthenticatedIndicacoesRoute,
   AuthenticatedInteligenciaRoute: AuthenticatedInteligenciaRoute,
@@ -722,6 +712,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedServicosRoute: AuthenticatedServicosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedEquipeRastrearRoute: AuthenticatedEquipeRastrearRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
