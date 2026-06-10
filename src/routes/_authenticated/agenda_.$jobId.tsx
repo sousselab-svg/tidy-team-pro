@@ -39,7 +39,7 @@ import { SignaturePad } from "@/components/SignaturePad";
 import { JobNps } from "@/components/JobNps";
 import { enqueueJobPatch, readCache, useOnlineStatus, writeCache } from "@/lib/offline";
 
-export const Route = createFileRoute("/_authenticated/agenda/$jobId")({
+export const Route = createFileRoute("/_authenticated/agenda_/$jobId")({
   head: () => ({ meta: [{ title: "Serviço — CleanOps" }] }),
   component: JobDetailPage,
 });
