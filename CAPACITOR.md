@@ -198,6 +198,33 @@ Pronto. Os testadores recebem convite e instalam pelo app **TestFlight**.
 
 ---
 
+## Pronto-para-submeter — checklist final
+
+Use esta lista antes de rodar `Product → Archive` no Xcode:
+
+- [ ] `CAP_ENV=production bun run build` executado (remove `server.url`)
+- [ ] `bunx cap sync` rodado depois do build
+- [ ] Bundle ID definido e Time selecionado em Signing & Capabilities
+- [ ] Version `1.0.0` / Build `1` em General
+- [ ] Ícones e Splash gerados (`@capacitor/assets`)
+- [ ] Info.plist com todos os textos de permissão (GPS, Câmera, Fotos, Notif.)
+- [ ] `PrivacyInfo.xcprivacy` adicionado ao target (ver seção iOS 17+)
+- [ ] Conta demo dos revisores funcional:
+      `apple-reviewer@cleanops.com` / `CleanOps2026!Review`
+- [ ] ASO kit pronto: `/mnt/documents/aso-kit.zip` (10 telas iPhone 6.7", 10
+      Android phone, 1 feature graphic 1024x500)
+- [ ] Build testado no simulador iOS sem console errors
+
+Notas de roteamento corrigidas para esta release:
+
+- `equipe.rastrear.tsx` foi renomeado para `equipe_.rastrear.tsx` para que
+  `/equipe/rastrear` deixe de ser tratado como sub-rota de `/equipe` (que
+  não renderiza `<Outlet />`) e mostre a tela de compartilhamento de GPS.
+- `agenda.$jobId.tsx` foi renomeado para `agenda_.$jobId.tsx` pelo mesmo
+  motivo: a tela de detalhe do serviço (com o pipeline **Agendado → A caminho
+  → Em andamento → Concluído**) agora abre corretamente em
+  `/agenda/<id>`.
+
 ## Revisão da App Store / Play Store
 
 ### Conta demo para os revisores (já criada)
