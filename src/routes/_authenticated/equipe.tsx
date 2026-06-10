@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { KeyRound, Link2, Link2Off, MapPin, Plus, ShieldCheck, Trash2, UserPlus, X } from "lucide-react";
+import { KeyRound, Link2, Link2Off, MapPin, Mail, Plus, ShieldCheck, Trash2, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { MobileShell, PageHeader } from "@/components/MobileShell";
 import {
@@ -18,6 +18,7 @@ import {
   getMyContext,
   inviteOperator,
   listOrgMembers,
+  resendOperatorInvite,
   unlinkOperator,
 } from "@/lib/team-users.functions";
 import {
@@ -105,6 +106,7 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
   const listOrg = useServerFn(listOrgMembers);
   const unlinkFn = useServerFn(unlinkOperator);
   const inviteFn = useServerFn(inviteOperator);
+  const resendFn = useServerFn(resendOperatorInvite);
   const list = useServerFn(listTeams);
   const qc = useQueryClient();
   const [linkFor, setLinkFor] = useState<{ id: string; name: string } | null>(null);
@@ -127,6 +129,17 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
       qc.invalidateQueries({ queryKey: ["teams"] });
       toast.success("Acesso removido");
     },
+    onError: (e: Error) => toast.error("Erro", { description: e.message }),
+  });
+
+  const resendMut = useMutation({
+    mutationFn: (user_id: string) => resendFn({ data: { user_id } }),
+    onSuccess: (res) =>
+      toast.success(
+        res?.kind === "recovery"
+          ? "Link de redefinição enviado"
+          : "Convite reenviado por email",
+      ),
     onError: (e: Error) => toast.error("Erro", { description: e.message }),
   });
 
@@ -170,6 +183,16 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
                     {m.role}
                   </span>
                   {isAdmin && m.role !== "admin" && (
+                    <>
+                    <button
+                      onClick={() => resendMut.mutate(m.user_id)}
+                      disabled={resendMut.isPending}
+                      className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+                      aria-label="Reenviar convite"
+                      title="Reenviar convite por email"
+                    >
+                      <Mail className="size-3.5" />
+                    </button>
                     <button
                       onClick={() => {
                         if (confirm("Remover acesso deste operador?")) unlinkMut.mutate(m.user_id);
@@ -179,6 +202,7 @@ function StaffTab({ isAdmin }: { isAdmin: boolean }) {
                     >
                       <Link2Off className="size-3.5" />
                     </button>
+                    </>
                   )}
                 </div>
               </li>
