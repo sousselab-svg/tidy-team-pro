@@ -29,11 +29,13 @@ const clientsQuery = queryOptions({ queryKey: ["clients"], queryFn: () => listCl
 const brl = (cents: number) =>
   formatCurrency(cents);
 
-const STATUS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
+const STATUS: Record<string, { label: string; cls: string }> = {
   open: { label: "Em aberto", cls: "bg-[color:var(--info)]/15 text-[color:var(--info)]" },
   paid: { label: "Pago", cls: "bg-[color:var(--success)]/15 text-[color:var(--success)]" },
+  overdue: { label: "Vencida", cls: "bg-[color:var(--destructive)]/15 text-[color:var(--destructive)]" },
   cancelled: { label: "Cancelada", cls: "bg-secondary text-muted-foreground" },
 };
+const STATUS_FALLBACK = { label: "—", cls: "bg-secondary text-muted-foreground" };
 
 function BillingPage() {
   const { t } = useTranslation();
@@ -131,7 +133,7 @@ function BillingPage() {
         ) : (
           <ul className="space-y-3">
             {invoices.map((inv) => {
-              const meta = STATUS[inv.status];
+              const meta = STATUS[inv.status] ?? STATUS_FALLBACK;
               const hasProof = !!inv.payment_proof_path && inv.status === "open";
               return (
                 <li key={inv.id} className="rounded-2xl bg-card p-4 ring-1 ring-border">
