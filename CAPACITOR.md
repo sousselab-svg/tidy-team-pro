@@ -88,6 +88,191 @@ Para adicionar mais (câmera, geolocalização, push, biometria, etc.), consulte
 
 Documentação oficial: https://capacitorjs.com/docs
 
+## Permissões nativas (iOS Info.plist + Android Manifest)
+
+Os plugins já estão instalados (`@capacitor/geolocation`, `@capacitor/camera`,
+`@capacitor/push-notifications`, `@capacitor/local-notifications`). Quando você
+rodar `bunx cap add ios` e `bunx cap add android`, as pastas nativas serão
+geradas. Em seguida, cole os textos abaixo nos arquivos indicados.
+
+### iOS — `ios/App/App/Info.plist`
+
+Adicione dentro de `<dict>...</dict>`:
+
+```xml
+<!-- GPS — usado para auto-check-in via geofence -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>O CleanOps usa sua localização para confirmar automaticamente o check-in quando você chega no endereço do cliente.</string>
+
+<!-- GPS em segundo plano — necessário para rastreamento ao vivo da equipe -->
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Para compartilhar sua posição com o supervisor durante o expediente, mesmo com o app em segundo plano.</string>
+
+<!-- Câmera — fotos antes/depois -->
+<key>NSCameraUsageDescription</key>
+<string>O CleanOps usa a câmera para registrar fotos do serviço (antes/depois) e da assinatura do cliente.</string>
+
+<!-- Galeria — anexar comprovantes -->
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Para anexar fotos já existentes do serviço ou comprovantes de pagamento.</string>
+
+<!-- Salvar fotos do serviço na galeria -->
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Para salvar uma cópia das fotos do serviço no seu rolo de câmera quando você desejar.</string>
+
+<!-- Microfone (caso vá gravar áudios na ordem de serviço — opcional) -->
+<key>NSMicrophoneUsageDescription</key>
+<string>Opcional: para gravar observações em áudio sobre o serviço.</string>
+
+<!-- Notificações: iOS não exige string aqui; o pedido aparece via push API -->
+```
+
+### Android — `android/app/src/main/AndroidManifest.xml`
+
+Adicione dentro de `<manifest>`, antes do `<application>`:
+
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!-- Android 10+: GPS em segundo plano -->
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+<!-- Compatibilidade Android 12 e anterior -->
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="32" />
+<!-- Android 13+: notificações push exigem permissão explícita -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.VIBRATE" />
+```
+
+Não esqueça de `<uses-feature android:name="android.hardware.camera" android:required="false" />`
+e `<uses-feature android:name="android.hardware.location.gps" android:required="false" />`
+para o app continuar instalável em tablets sem GPS/câmera.
+
+---
+
+## Build TestFlight (passo a passo no Mac)
+
+Pré-requisitos: macOS, Xcode 15+, conta Apple Developer ativa.
+
+```bash
+# 1. Clonar o repositório do GitHub
+git clone <seu-repo> cleanops && cd cleanops
+bun install
+
+# 2. Build estático SEM o server.url do Lovable preview
+CAP_ENV=production bun run build
+bunx cap add ios          # primeira vez por máquina
+bunx cap sync
+
+# 3. (Opcional, primeira vez) gerar ícones/splash
+bunx @capacitor/assets generate \
+  --iconBackgroundColor '#10b981' \
+  --splashBackgroundColor '#10b981'
+
+# 4. Colar no Info.plist os textos de permissão (seção acima)
+
+# 5. Abrir no Xcode
+bunx cap open ios
+```
+
+No **Xcode**:
+
+1. Selecione o target **App** → aba **Signing & Capabilities**
+   - Time: sua conta Apple Developer
+   - Bundle Identifier: `com.cleanops.fieldservice` (defina o seu)
+   - Capabilities: adicione *Push Notifications* e *Background Modes →
+     Location updates / Remote notifications* (se for usar push em background).
+2. Aba **General** → Version `1.0.0`, Build `1`.
+3. Topo: selecione **Any iOS Device (arm64)** como destino.
+4. Menu **Product → Archive** (leva 2-5 min).
+5. Quando abrir o Organizer: **Distribute App → App Store Connect → Upload**.
+6. Aguarde o e-mail "App processed" da Apple (10-30 min).
+7. Em [appstoreconnect.apple.com](https://appstoreconnect.apple.com) →
+   **TestFlight** → adicione o build a um grupo de testadores internos.
+
+Pronto. Os testadores recebem convite e instalam pelo app **TestFlight**.
+
+---
+
+## Revisão da App Store / Play Store
+
+### Conta demo para os revisores (já criada)
+
+No App Store Connect → **App Information → App Review Information** cole:
+
+```
+Sign-in required: Yes
+Username: apple-reviewer@cleanops.com
+Password: CleanOps2026!Review
+
+Notes:
+The reviewer account is a pre-populated admin demo. Suggested flow:
+1. Home dashboard → see today's revenue, jobs and team in field
+2. Tap any "in progress" job → see checklist, photos, signature, geofence
+3. Schedule (Agenda) → swipe through coming days to see scheduled jobs
+4. Clients → 5 customers (residential + commercial); open Hotel Vista Verde
+   to see recurring contract
+5. Team → invite/resend operator email; live tracking map
+6. NPS → 2 customer responses (scores 9 and 10) + average chart
+7. Finance → paid / open / overdue invoices
+```
+
+No Google Play Console → **App content → App access** mesma credencial.
+
+### Privacy Manifest (iOS 17+)
+
+A partir do iOS 17 a Apple exige `PrivacyInfo.xcprivacy` declarando APIs
+sensíveis usadas. Crie em `ios/App/App/PrivacyInfo.xcprivacy`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSPrivacyCollectedDataTypes</key>
+  <array>
+    <dict>
+      <key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypeEmailAddress</string>
+      <key>NSPrivacyCollectedDataTypeLinked</key><true/>
+      <key>NSPrivacyCollectedDataTypeTracking</key><false/>
+      <key>NSPrivacyCollectedDataTypePurposes</key>
+      <array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array>
+    </dict>
+    <dict>
+      <key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypePreciseLocation</string>
+      <key>NSPrivacyCollectedDataTypeLinked</key><true/>
+      <key>NSPrivacyCollectedDataTypeTracking</key><false/>
+      <key>NSPrivacyCollectedDataTypePurposes</key>
+      <array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array>
+    </dict>
+    <dict>
+      <key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypePhotosorVideos</string>
+      <key>NSPrivacyCollectedDataTypeLinked</key><true/>
+      <key>NSPrivacyCollectedDataTypeTracking</key><false/>
+      <key>NSPrivacyCollectedDataTypePurposes</key>
+      <array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array>
+    </dict>
+  </array>
+  <key>NSPrivacyTracking</key><false/>
+</dict>
+</plist>
+```
+
+### Motivos comuns de rejeição e como evitar
+
+| Motivo | Prevenção |
+|---|---|
+| **Guideline 4.2** (app é só um wrapper de site) | Buildar com `CAP_ENV=production` para empacotar bundle estático; usar plugins nativos (já temos GPS, câmera, push, hápticos). |
+| **Guideline 5.1.1** (permissões sem justificativa) | Strings `NSXxxUsageDescription` em PT-BR claros (já fornecidos acima). |
+| **Guideline 5.1.5** (uso de GPS em background) | Declarar *Background Modes → Location updates* no Xcode e justificar no review notes. |
+| **Guideline 2.1** (revisor não consegue testar) | Conta demo pré-populada já criada (`apple-reviewer@cleanops.com`). |
+| **Privacy Manifest ausente** | Arquivo `PrivacyInfo.xcprivacy` acima. |
+| **Política de Privacidade inacessível** | URL pública: `https://<seu-domínio>/privacidade` — publique o app no Lovable antes de submeter. |
+
 ## Ícone e Splash Screen
 
 Os assets-fonte já estão no projeto:
