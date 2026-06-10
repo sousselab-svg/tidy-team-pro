@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import "@/lib/i18n";
 import { Toaster } from "sonner";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { AnimatedSplash } from "@/components/AnimatedSplash";
 
 function NotFoundComponent() {
   const { t } = useTranslation();
@@ -140,6 +141,7 @@ function RootComponent() {
       <Outlet />
       <Toaster position="top-center" richColors />
       <CookieConsentBanner />
+      <AnimatedSplash />
     </QueryClientProvider>
   );
 }
