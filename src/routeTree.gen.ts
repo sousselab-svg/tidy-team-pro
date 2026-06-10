@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DispatchRouteImport } from './routes/dispatch'
@@ -42,6 +44,11 @@ import { Route as AuthenticatedEquipeRastrearRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgendaJobIdRouteImport } from './routes/_authenticated/agenda_.$jobId'
 import { Route as ApiPublicHooksGrowthCronRouteImport } from './routes/api/public/hooks/growth-cron'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
@@ -50,6 +57,11 @@ const TermosRoute = TermosRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -217,8 +229,10 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
+  '/terms': typeof TermsRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
@@ -249,8 +263,10 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
+  '/terms': typeof TermsRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
@@ -284,8 +300,10 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
@@ -320,8 +338,10 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/forgot-password'
     | '/privacidade'
+    | '/privacy'
     | '/reset-password'
     | '/termos'
+    | '/terms'
     | '/agenda'
     | '/clientes'
     | '/configuracoes'
@@ -352,8 +372,10 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/forgot-password'
     | '/privacidade'
+    | '/privacy'
     | '/reset-password'
     | '/termos'
+    | '/terms'
     | '/agenda'
     | '/clientes'
     | '/configuracoes'
@@ -386,8 +408,10 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/forgot-password'
     | '/privacidade'
+    | '/privacy'
     | '/reset-password'
     | '/termos'
+    | '/terms'
     | '/_authenticated/agenda'
     | '/_authenticated/clientes'
     | '/_authenticated/configuracoes'
@@ -421,8 +445,10 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermosRoute: typeof TermosRoute
+  TermsRoute: typeof TermsRoute
   ConfirmarExclusaoTokenRoute: typeof ConfirmarExclusaoTokenRoute
   NpsTokenRoute: typeof NpsTokenRoute
   PortalTokenRoute: typeof PortalTokenRoute
@@ -431,6 +457,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/termos': {
       id: '/termos'
       path: '/termos'
@@ -443,6 +476,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -715,8 +755,10 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermosRoute: TermosRoute,
+  TermsRoute: TermsRoute,
   ConfirmarExclusaoTokenRoute: ConfirmarExclusaoTokenRoute,
   NpsTokenRoute: NpsTokenRoute,
   PortalTokenRoute: PortalTokenRoute,
@@ -725,3 +767,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
