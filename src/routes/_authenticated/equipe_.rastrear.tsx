@@ -10,7 +10,7 @@ import { listTeams } from "@/lib/teams.functions";
 import { recordTeamLocation } from "@/lib/team-locations.functions";
 import { autoCheckIn } from "@/lib/geofence.functions";
 
-export const Route = createFileRoute("/_authenticated/equipe/rastrear")({
+export const Route = createFileRoute("/_authenticated/equipe_/rastrear")({
   head: () => ({ meta: [{ title: "Rastrear equipe — CleanOps" }] }),
   component: TrackerPage,
 });
