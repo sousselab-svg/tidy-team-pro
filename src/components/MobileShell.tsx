@@ -116,7 +116,10 @@ export function PageHeader({
   }
 
   return (
-    <header className="px-5 pt-8 pb-4">
+    <header
+      className="px-5 pb-4"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 16px)" }}
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           {eyebrow && (
