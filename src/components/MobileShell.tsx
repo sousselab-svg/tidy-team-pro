@@ -46,12 +46,20 @@ export function MobileShell({ children }: { children: ReactNode }) {
   });
   const proofsCount = data?.count ?? 0;
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-[100dvh] bg-background text-foreground overflow-x-hidden">
       <OfflineBanner />
       <OperatorOnboarding />
-      <div className="mx-auto max-w-[480px] min-h-screen pb-24">{children}</div>
-      <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur">
-        <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-2 pt-2 pb-5">
+      <div
+        className="mx-auto max-w-[480px] min-h-[100dvh]"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
+      >
+        {children}
+      </div>
+      <nav
+        className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <ul className="mx-auto flex max-w-[480px] items-stretch justify-between px-2 pt-1.5 pb-1.5">
           {nav.map(({ to, labelKey, Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             const showBadge = to === "/faturamento" && proofsCount > 0;
