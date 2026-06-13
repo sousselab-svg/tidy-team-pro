@@ -40,14 +40,6 @@ const emitServerShimPlugin = () => {
 };
 
 export default defineConfig({
-  tanstackStart: {
-    // Generate an official SPA shell (dist/client/_shell.html) during build.
-    // This shell contains the proper TanStack Start client bootstrap payload
-    // and is what Capacitor (iOS/Android) ships as index.html — a hand-made
-    // index.html cannot boot the app (white screen) because the client entry
-    // expects the framework's serialized bootstrap data.
-    spa: { enabled: true },
-  },
   vite: {
     plugins: [emitServerShimPlugin()],
   },
