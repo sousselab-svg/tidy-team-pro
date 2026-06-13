@@ -40,6 +40,9 @@ const emitServerShimPlugin = () => {
 };
 
 export default defineConfig({
+  tanstackStart: {
+    spa: { enabled: true },
+  },
   vite: {
     plugins: [emitServerShimPlugin()],
   },
