@@ -8,7 +8,7 @@ const isProduction = process.env.CAP_ENV === 'production' || process.env.NODE_EN
 const config: CapacitorConfig = {
   appId: 'app.lovable.6a6af60f372a40a6a7dc46010b75f6d4',
   appName: 'Field Service',
-  webDir: 'dist',
+  webDir: 'dist/client',
   // Em produção NÃO definimos `server.url` — o app carrega o bundle estático
   // empacotado dentro do binário, como exige a Apple (apps que são apenas
   // "wrapper" de um site são rejeitados na review).
