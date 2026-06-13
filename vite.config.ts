@@ -8,9 +8,6 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
     // Generate an official SPA shell (dist/client/_shell.html) during build.
     // This shell contains the proper TanStack Start client bootstrap payload
     // and is what Capacitor (iOS/Android) ships as index.html — a hand-made
