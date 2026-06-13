@@ -22,9 +22,13 @@ if (!entry) {
   process.exit(1);
 }
 
-const cssEntry = manifest["/dev-server/src/styles.css"] ?? Object.values(manifest).find(
+const cssEntry = Object.values(manifest).find(
   (e) => typeof e.file === "string" && e.file.endsWith(".css")
 );
+const iconEntry = Object.values(manifest).find(
+  (e) => typeof e.file === "string" && e.file.includes("app-icon")
+);
+const iconHref = iconEntry ? `/${iconEntry.file}` : "/favicon.ico";
 
 const cssLinks = [cssEntry?.file, ...(entry.css ?? [])]
   .filter(Boolean)
@@ -38,8 +42,8 @@ const html = `<!doctype html>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <title>Field Service</title>
     <meta name="description" content="Field Service mobile app" />
-    <link rel="icon" type="image/png" href="/assets/app-icon-CrB3AMZe.png" />
-    <link rel="apple-touch-icon" href="/assets/app-icon-CrB3AMZe.png" />
+    <link rel="icon" type="image/png" href="${iconHref}" />
+    <link rel="apple-touch-icon" href="${iconHref}" />
 ${cssLinks}
     <style>html,body,#root{background:#fff;margin:0;min-height:100vh}</style>
   </head>
