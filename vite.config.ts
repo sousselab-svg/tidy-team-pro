@@ -15,21 +15,29 @@ import { resolve } from "node:path";
 // matching file the prerender 500s with `ERR_MODULE_NOT_FOUND` and the build
 // aborts. This plugin emits a 1-line re-export shim right after the server
 // bundle is written so the preview server can resolve it.
-const emitServerShimPlugin = () => ({
-  name: "lovable:emit-server-shim",
-  applyToEnvironment(env: { name: string }) {
-    return env.name === "server";
-  },
-  closeBundle() {
-    const shimPath = resolve(process.cwd(), "dist/server/server.js");
+const emitServerShimPlugin = () => {
+  let written = false;
+  const tryWrite = () => {
+    if (written) return;
     const targetPath = resolve(process.cwd(), "dist/server/index.mjs");
     if (!existsSync(targetPath)) return;
     writeFileSync(
-      shimPath,
+      resolve(process.cwd(), "dist/server/server.js"),
       "export { default } from './index.mjs';\nexport * from './index.mjs';\n",
     );
-  },
-});
+    written = true;
+  };
+  return {
+    name: "lovable:emit-server-shim",
+    enforce: "post" as const,
+    writeBundle() {
+      tryWrite();
+    },
+    closeBundle() {
+      tryWrite();
+    },
+  };
+};
 
 export default defineConfig({
   tanstackStart: {
