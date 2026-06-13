@@ -153,6 +153,14 @@
   }
 }
 
+/* Prevent black/white flashes during native -> webview handover.
+   The native launch image is solid white with the gold G, so we force the
+   html/body background to white before any React paint. The AnimatedSplash
+   then takes over with the same white canvas. */
+html, body, #root {
+  background-color: #ffffff;
+}
+
 /* ===== Animated splash keyframes ===== */
 @keyframes splash-pop {
   0% { transform: scale(0.4) rotate(-18deg); opacity: 0; filter: blur(8px); }

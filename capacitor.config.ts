@@ -28,7 +28,12 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1500,
+      // Native splash stays visible until the in-app video splash mounts
+      // and calls SplashScreen.hide() — this masks the white/black flashes
+      // between the native boot and the first React paint.
+      launchAutoHide: false,
+      launchShowDuration: 5000,
+      launchFadeOutDuration: 350,
       backgroundColor: '#ffffff',
       showSpinner: false,
       androidScaleType: 'CENTER_CROP',
