@@ -11,12 +11,26 @@ const NATIVE_SERVER_ORIGIN =
   "https://project--6a6af60f-372a-40a6-a7dc-46010b75f6d4.lovable.app";
 
 const REWRITE_PREFIXES = ["/_serverFn/", "/api/"];
+const LOCAL_NATIVE_PROTOCOLS = new Set(["capacitor:", "ionic:"]);
+const LOCAL_NATIVE_HOSTS = new Set(["localhost"]);
 
 let installed = false;
+
+function shouldRewriteNativeRequests() {
+  const { protocol, hostname } = window.location;
+
+  if (LOCAL_NATIVE_PROTOCOLS.has(protocol)) return true;
+
+  return (
+    (protocol === "http:" || protocol === "https:") &&
+    LOCAL_NATIVE_HOSTS.has(hostname)
+  );
+}
 
 export function installNativeFetchRewrite() {
   if (installed || typeof window === "undefined") return;
   if (!Capacitor.isNativePlatform()) return;
+  if (!shouldRewriteNativeRequests()) return;
   installed = true;
 
   const originalFetch = window.fetch.bind(window);
