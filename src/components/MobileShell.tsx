@@ -42,7 +42,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
     retry: false,
     staleTime: 30_000,
     refetchOnWindowFocus: true,
-    enabled: me?.role !== "operator",
+    enabled: !!me && me.role !== "operator",
   });
   const proofsCount = data?.count ?? 0;
   return (
