@@ -32,8 +32,8 @@ const config: CapacitorConfig = {
       // and calls SplashScreen.hide() — this masks the white/black flashes
       // between the native boot and the first React paint.
       launchAutoHide: false,
-      launchShowDuration: 5000,
-      launchFadeOutDuration: 350,
+      launchShowDuration: 3000,
+      launchFadeOutDuration: 250,
       backgroundColor: '#ffffff',
       showSpinner: false,
       androidScaleType: 'CENTER_CROP',
