@@ -5,12 +5,10 @@ import { Capacitor } from "@capacitor/core";
 // capacitor://localhost and fail (white screen / dead data). We rewrite those
 // calls to the deployed Lovable server.
 //
-// While the project is not published yet, we point at the stable preview
-// deployment. Once you publish the app, switch to the production URL below.
+// Stable production URL — serves the latest published deployment.
+// The app must be published in Lovable for this URL to respond (otherwise 403).
 const NATIVE_SERVER_ORIGIN =
-  "https://project--6a6af60f-372a-40a6-a7dc-46010b75f6d4-dev.lovable.app";
-// After publishing, use:
-// const NATIVE_SERVER_ORIGIN = "https://project--6a6af60f-372a-40a6-a7dc-46010b75f6d4.lovable.app";
+  "https://project--6a6af60f-372a-40a6-a7dc-46010b75f6d4.lovable.app";
 
 const REWRITE_PREFIXES = ["/_serverFn/", "/api/"];
 
