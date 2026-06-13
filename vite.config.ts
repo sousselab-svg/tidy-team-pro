@@ -11,15 +11,11 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
-  },
-  vite: {
-    // Emit a Vite client manifest so the post-build script can resolve the
-    // hashed client entry chunk and generate a static SPA index.html shell
-    // that Capacitor (iOS / Android) ships inside the native binary.
-    environments: {
-      client: {
-        build: { manifest: true },
-      },
-    },
+    // Generate an official SPA shell (dist/client/_shell.html) during build.
+    // This shell contains the proper TanStack Start client bootstrap payload
+    // and is what Capacitor (iOS/Android) ships as index.html — a hand-made
+    // index.html cannot boot the app (white screen) because the client entry
+    // expects the framework's serialized bootstrap data.
+    spa: { enabled: true },
   },
 });
