@@ -40,6 +40,10 @@ const emitServerShimPlugin = () => {
 };
 
 export default defineConfig({
+  nitro: process.env.BUILD_NATIVE === "true" ? false : undefined,
+  tanstackStart: {
+    spa: { enabled: true },
+  },
   vite: {
     plugins: [emitServerShimPlugin()],
   },
