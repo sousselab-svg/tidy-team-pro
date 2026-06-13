@@ -17,6 +17,7 @@ export default defineConfig({
     // the SSR worker.
     spa: {
       enabled: true,
+      maskPath: "/__spa-shell",
       prerender: {
         outputPath: "/index.html",
         crawlLinks: false,
